@@ -62,3 +62,22 @@
 - **dividend_coverage_ratio_current**: 49.18008010712374
 - **dividend_coverage_ratio_3y_mean**: 113.69384101704367
 - **dividend_coverage_prob_undercovered_3y**: 0.01
+- **pi_star_current**: 0.03376858078089663
+- **mispricing_delta_current**: 0.2083986887258184
+- **mispricing_z_score_current**: 0.2679567213447082
+- **reflexivity_gain_current**: 4.885477689646627e-07
+- **kappa_eff_current**: 5.2136519133577615
+- **pi_crit_current**: -1.1146653649167593
+- **distance_to_tipping**: 1.3568326344234742
+- **WACBA_current**: 0.01736129733030759
+
+## Theory Indicators
+
+- **Fair Premium (pi*):** 0.0338
+- **Mispricing (Delta):** 0.2084
+- **Mispricing z-score:** 0.27
+- **Reflexivity Gain (G):** 0.0000
+- **Effective kappa:** 5.214
+- **Tipping Point (pi_crit):** -1.1147
+- **Distance to Tipping:** 1.3568
+- **WACBA:** 0.0174

@@ -10,15 +10,26 @@ from .calibration import build_model_params
 from .indicators import (
     compute_dividend_coverage_from_sim,
     compute_dividend_coverage_ratio,
+    compute_fair_premium,
     compute_ibgr_per_share,
     compute_ibgr_total,
     compute_ifrd,
     compute_ile_from_panel,
+    compute_mispricing,
     compute_pmri,
+    compute_reflexivity_gain,
     compute_survival_probability,
     compute_tee_from_panel,
+    compute_tipping_point,
+    compute_wacba,
 )
-from .plots import plot_capital_structure, plot_core_timeseries, plot_ifrd_histogram
+from .plots import (
+    plot_capital_structure,
+    plot_core_timeseries,
+    plot_fair_premium_vs_actual,
+    plot_ifrd_histogram,
+    plot_mispricing_timeseries,
+)
 from .preprocessing import build_daily_panel
 from .simulation import SimulationConfig, simulate_paths
 
@@ -73,6 +84,22 @@ def main() -> None:
     dcr_current = compute_dividend_coverage_ratio(
         asset_value=h0 * s0, debt=d0, annual_preferred_dividend=pref_div
     )
+
+    # 3b. New theory indicators
+    pi_star_series = compute_fair_premium(params, panel)
+    mispricing_df = compute_mispricing(panel["premium"], pi_star_series)
+    reflexivity_df = compute_reflexivity_gain(params, panel)
+    pi_crit_series = compute_tipping_point(params, panel)
+    wacba_series = compute_wacba(panel, params)
+
+    pi_star_current = float(pi_star_series.iloc[-1])
+    delta_current = float(mispricing_df["delta"].iloc[-1])
+    z_score_current = float(mispricing_df["z_score"].iloc[-1])
+    gain_current = float(reflexivity_df["G"].iloc[-1])
+    kappa_eff_current = float(reflexivity_df["kappa_eff"].iloc[-1])
+    pi_crit_current = float(pi_crit_series.iloc[-1])
+    distance_to_tipping = float(pi0 - pi_crit_current)
+    wacba_current = float(wacba_series.iloc[-1])
 
     # 4. Monte Carlo simulation under P
     sim_cfg = SimulationConfig(n_paths=5000, years=3.0, dt=1.0 / 252.0, random_seed=42)
@@ -142,6 +169,14 @@ def main() -> None:
         "dividend_coverage_ratio_current": dcr_current,
         "dividend_coverage_ratio_3y_mean": dcr_sim["mean"],
         "dividend_coverage_prob_undercovered_3y": dcr_sim["prob_undercovered"],
+        "pi_star_current": pi_star_current,
+        "mispricing_delta_current": delta_current,
+        "mispricing_z_score_current": z_score_current,
+        "reflexivity_gain_current": gain_current,
+        "kappa_eff_current": kappa_eff_current,
+        "pi_crit_current": pi_crit_current,
+        "distance_to_tipping": distance_to_tipping,
+        "WACBA_current": wacba_current,
     }
 
     with open(RESULTS_DIR / "indicators.json", "w", encoding="utf-8") as f:
@@ -150,6 +185,8 @@ def main() -> None:
     # 7. Plots
     plot_core_timeseries(panel, ile_series, tee_series, FIGURES_DIR)
     plot_ifrd_histogram(G, FIGURES_DIR)
+    plot_fair_premium_vs_actual(panel, pi_star_series, FIGURES_DIR)
+    plot_mispricing_timeseries(mispricing_df, FIGURES_DIR)
 
     if pref is not None:
         plot_capital_structure(
@@ -212,6 +249,16 @@ def main() -> None:
         for k, v in indicators.items():
             f.write(f"- **{k}**: {v}\n")
 
+        f.write("\n## Theory Indicators\n\n")
+        f.write(f"- **Fair Premium (pi*):** {pi_star_current:.4f}\n")
+        f.write(f"- **Mispricing (Delta):** {delta_current:.4f}\n")
+        f.write(f"- **Mispricing z-score:** {z_score_current:.2f}\n")
+        f.write(f"- **Reflexivity Gain (G):** {gain_current:.4f}\n")
+        f.write(f"- **Effective kappa:** {kappa_eff_current:.3f}\n")
+        f.write(f"- **Tipping Point (pi_crit):** {pi_crit_current:.4f}\n")
+        f.write(f"- **Distance to Tipping:** {distance_to_tipping:.4f}\n")
+        f.write(f"- **WACBA:** {wacba_current:.4f}\n")
+
     # 10. Basic textual summary to stdout
     print("=== Capital Structure ===")
     print(f"BTC Holdings: {h0:,.0f}")
@@ -228,6 +275,16 @@ def main() -> None:
     print("\n=== Key indicators ===")
     for k, v in indicators.items():
         print(f"{k}: {v}")
+
+    print("\n=== Theory indicators ===")
+    print(f"Fair Premium (pi*): {pi_star_current:.4f}")
+    print(f"Mispricing (Delta): {delta_current:.4f}")
+    print(f"Mispricing z-score: {z_score_current:.2f}")
+    print(f"Reflexivity Gain (G): {gain_current:.4f}")
+    print(f"Effective kappa: {kappa_eff_current:.3f}")
+    print(f"Tipping Point (pi_crit): {pi_crit_current:.4f}")
+    print(f"Distance to Tipping: {distance_to_tipping:.4f}")
+    print(f"WACBA: {wacba_current:.4f}")
 
 
 if __name__ == "__main__":
