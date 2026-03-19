@@ -1,0 +1,176 @@
+%!TEX root = ../main.tex
+
+\section{Discussion}\label{sec:discussion}
+
+%=============================================================================
+\subsection{Theory Assessment}
+%=============================================================================
+
+The endogenous premium model provides a coherent explanation for Strategy's
+persistent NAV premium.  The core insight---that the premium is the present
+value of an accumulation option---resolves the apparent anomaly: unlike a
+closed-end fund discount driven by sentiment or agency costs, the premium
+reflects genuine economic value created by the ability to issue equity above
+NAV and purchase BTC accretively.
+
+The model's predictions align well with calibrated data across six
+dimensions (Section~\ref{sec:theory_validation}): positive premium from
+accumulation capability, premium below steady-state implying positive carry,
+financing channel selection matching the premium regime, dampened reflexivity
+from premium compression, adequate survival margin, and procyclical leverage.
+
+The fixed-point equation~\eqref{eq:pi_star_closed} provides a quantitative
+tool for premium assessment.  At steady state, the fair premium is determined
+by four fundamentals: BTC volatility $\sigma_S$ (positive vega), issuance
+intensity $\alpha_N$ (moneyness), leverage $\ell$ (negative effect), and
+discount rate $r$ (negative rho).  Changes in any of these fundamentals
+shift the equilibrium, with the comparative statics providing directional
+guidance.
+
+%=============================================================================
+\subsection{Where Is Strategy Currently?}
+%=============================================================================
+
+The indicator dashboard places Strategy in the ``MSTR dominates'' quadrant
+of the regime map (Corollary~\ref{cor:regime_map}): IBGR is positive
+(17.6\%) and PMRI is negative ($-0.71$).  The accumulation option is in the
+money, the premium is underpriced relative to its long-run equilibrium,
+and leverage is moderate ($\mathrm{ILE} = 1.49 < 2$).
+
+However, several factors warrant caution:
+\begin{itemize}
+  \item The current premium ($\pi_0 = 0.242$) is below the ATM accretion
+    threshold ($\pi^*_{\mathrm{ATM}} = 0.397$), meaning common equity
+    issuance is currently mildly dilutive.  Strategy must rely on
+    preferred stock and convertible debt to fund BTC purchases---channels
+    with effective costs of 10--12.5\%.
+  \item The preferred dividend burden of \$977M/year is a fixed obligation
+    regardless of BTC price.  While the dividend coverage ratio is
+    comfortable at 49$\times$, a sustained BTC decline to \$15,000--\$20,000
+    would bring the leverage spiral condition
+    (Corollary~\ref{cor:leverage_spiral}) into play.
+  \item The 91.9\% three-year survival probability, while reassuring,
+    implies an 8.1\% probability of NAV breach---non-trivial for a
+    single-asset vehicle.
+\end{itemize}
+
+The critical near-term question is whether the premium recovers above the
+ATM threshold, re-enabling the cheapest financing channel.  If BTC
+appreciates significantly and the premium expands, the flywheel can
+re-engage.  If the premium continues to compress, Strategy faces increasing
+reliance on expensive preferred financing, degrading the capital structure
+toward the tipping point of Theorem~\ref{thm:three_equilibria}.
+
+%=============================================================================
+\subsection{Implications for Investors}
+%=============================================================================
+
+\paragraph{MSTR vs.\ ETF.}
+At the current calibration point, the indicators favour MSTR over a spot
+BTC ETF for investors with sufficient risk tolerance:
+\begin{itemize}
+  \item Positive carry from $\mathrm{PMRI} < 0$ (expected premium
+    expansion).
+  \item Active accumulation option (IBGR $> 0$).
+  \item Moderate leverage providing amplified upside.
+\end{itemize}
+However, the ETF is preferable for investors seeking pure BTC exposure
+without the embedded risks of the capital structure, particularly given
+the negative TEE (equity moving inversely to BTC at the margin).
+
+\paragraph{Signal monitoring.}
+The regime map provides actionable signals:
+\begin{itemize}
+  \item \textbf{PMRI crossing zero} signals the transition from
+    positive to negative carry---the premium is now overpriced relative
+    to fundamentals.
+  \item \textbf{IBGR approaching zero} signals the flywheel is stalling
+    ---accumulation is no longer accretive.
+  \item \textbf{ILE exceeding 2} signals excessive leverage and
+    elevated tail risk.
+  \item \textbf{DCR falling below 10$\times$} signals preferred dividend
+    sustainability concerns.
+\end{itemize}
+
+%=============================================================================
+\subsection{Optimal Capital Structure Prescriptions}
+%=============================================================================
+
+The analysis yields concrete prescriptions for Strategy's financing:
+\begin{enumerate}
+  \item \textbf{Resume ATM when $\pi_t > 0.40$:} This is the accretion
+    threshold at current leverage.  ATM issuance is the cheapest channel
+    and should be used aggressively above this level.
+  \item \textbf{Limit preferred issuance:} Each additional preferred
+    series increases the dividend burden and the ATM accretion threshold
+    ($\pi^*_{\mathrm{ATM}} = \log(\mathrm{ILE})$ rises with
+    $P^{\mathrm{liq}}$).  The current \$977M annual dividend is already
+    a material fixed cost.
+  \item \textbf{Maintain cash buffer:} The \$2.25B cash reserve provides
+    2.5 years of preferred dividend coverage in a zero-BTC-liquidation
+    scenario.  This buffer is essential for surviving temporary drawdowns
+    without forced sales.
+  \item \textbf{Minimise WACBA:} Financing decisions should target the
+    lowest WACBA given premium and leverage constraints, shifting
+    channels as $\pi_t$ fluctuates.
+\end{enumerate}
+
+%=============================================================================
+\subsection{Systemic Risk}
+%=============================================================================
+
+Strategy's success has catalysed corporate BTC adoption: over 70 public
+companies now hold Bitcoin on balance sheet.  The market impact analysis
+(Section~\ref{sec:market_impact_theory}) highlights two systemic
+considerations:
+
+\begin{enumerate}
+  \item \textbf{Concentration risk:} Strategy holds 3.84\% of circulating
+    BTC supply.  A forced liquidation at the full-stack distress threshold
+    (\$24,200) would involve selling up to 761,068~BTC, roughly 30 days
+    of average trading volume.  The price impact of such a sale, using
+    Kyle lambda estimates, would be devastating.
+  \item \textbf{Contagion:} If aggregate corporate holdings reach
+    10--15\% of circulating supply, the contagion cascade mechanism
+    (Theorem~\ref{thm:contagion}) becomes material.  A BTC decline that
+    triggers one firm's distress threshold could propagate through
+    correlated forced sales.
+\end{enumerate}
+
+The asymptotic stability result (Corollary~\ref{cor:asymptotic}) provides
+a counterpoint: as BTC market depth grows ($2g_S + g_V > g_E$), the
+reflexive feedback naturally weakens.  The question is whether market
+maturation outpaces corporate adoption.
+
+%=============================================================================
+\subsection{Limitations and Future Work}
+%=============================================================================
+
+\paragraph{Limitations.}
+\begin{enumerate}
+  \item \emph{Physical measure:} We work under $\mathbb{P}$ throughout.
+    A risk-neutral ($\mathbb{Q}$) formulation would enable derivative
+    pricing and arbitrage-free valuation.
+  \item \emph{Constant parameters:} The OU calibration assumes
+    time-invariant $\kappa$, $\theta$, $\sigma_\pi$.  Regime-switching
+    or time-varying parameters may better capture the structural
+    break around the Q4~2024 premium spike.
+  \item \emph{Single-firm focus:} Calibration is specific to Strategy.
+    Generalisation to other BTC treasury vehicles requires
+    firm-specific parameter estimation.
+  \item \emph{Preferred stock modelling:} We treat preferred stock as a
+    fixed obligation (liquidation value plus dividends).  The embedded
+    call provisions, conversion optionality (STRK), and variable-rate
+    features (STRC) introduce additional complexity not fully captured.
+  \item \emph{Market impact estimation:} The Kyle lambda parameter
+    $\eta$ is not directly estimated from our data.  We rely on
+    literature estimates for illustrative analysis.
+\end{enumerate}
+
+\paragraph{Future work.}
+Natural extensions include: (i)~risk-neutral pricing of the accumulation
+option using derivatives data; (ii)~regime-switching models for $\kappa$
+and $\theta$; (iii)~cross-sectional estimation across multiple BTC treasury
+vehicles; (iv)~structural estimation of the feedback gain $G$ from
+high-frequency issuance-price data; and (v)~welfare analysis of corporate
+BTC adoption under the contagion cascade framework.

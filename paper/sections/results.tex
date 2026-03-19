@@ -1,0 +1,265 @@
+%!TEX root = ../main.tex
+
+\section{Results}\label{sec:results}
+
+%=============================================================================
+\subsection{Parameter Estimates}\label{sec:param_estimates}
+%=============================================================================
+
+Table~\ref{tab:calibrated} reports the full set of calibrated parameters.
+
+\begin{table}[H]
+\centering
+\caption{Calibrated model parameters (sample: Jan 2021 -- Mar 2026).}
+\label{tab:calibrated}
+\begin{tabular}{@{}llc@{}}
+\toprule
+\textbf{Parameter} & \textbf{Description} & \textbf{Estimate} \\
+\midrule
+\multicolumn{3}{@{}l}{\emph{BTC dynamics}} \\
+$\mu_S$ & BTC drift (annualised) & 0.111 \\
+$\sigma_S$ & BTC volatility (annualised) & 0.487 \\
+\midrule
+\multicolumn{3}{@{}l}{\emph{Premium OU process}} \\
+$\kappa$ & Mean-reversion speed & 5.214 \\
+$\theta$ & Long-run mean & 1.081 \\
+$\sigma_\pi$ & Premium diffusion & 3.794 \\
+\midrule
+\multicolumn{3}{@{}l}{\emph{Correlation and sensitivity}} \\
+$\rho$ & $\mathrm{corr}(dW^S, dW^\pi)$ & $-0.368$ \\
+$\gamma_{\pi S}$ & Premium--BTC sensitivity & $-3.597$ \\
+\midrule
+\multicolumn{3}{@{}l}{\emph{Holdings dynamics}} \\
+$\alpha$ & Continuous accumulation intensity & 0.000 \\
+$\lambda_M$ & Jump arrival rate (events/year) & 19.050 \\
+$\mathbb{E}[\Delta H]$ & Mean jump size (BTC) & 7,044 \\
+\midrule
+\multicolumn{3}{@{}l}{\emph{Balance sheet (initial conditions)}} \\
+$D_0$ & Debt & \$8.22B \\
+$P_0^{\mathrm{liq}}$ & Preferred liquidation value & \$10.23B \\
+$N_0^{\mathrm{sh}}$ & Shares outstanding & 320.4M \\
+$S_0$ & BTC price & \$73,909 \\
+$H_0$ & BTC holdings & 761,068 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Several features are noteworthy.  The mean-reversion speed $\hat\kappa = 5.21$
+implies a premium half-life of $\ln 2 / 5.21 \approx 49$ trading days
+($\sim$2.5 months) for the exogenous model.  The long-run mean
+$\hat\theta = 1.08$ corresponds to a steady-state premium of
+$e^{1.08} - 1 \approx 195\%$ over NAV, reflecting the historical period
+that includes the extreme premium expansion of late~2024.  The negative
+$\hat\gamma_{\pi S} = -3.60$ indicates that the premium compresses sharply
+when BTC rises---a critical dampening mechanism.
+
+The continuous accumulation intensity $\hat\alpha = 0$ reflects that
+Strategy's BTC purchases are overwhelmingly discrete events rather than
+continuous market orders: the Poisson jump process ($\lambda_M = 19.05$
+events/year, mean jump 7,044~BTC) captures the actual accumulation
+pattern.
+
+%=============================================================================
+\subsection{Base Indicators}\label{sec:base_indicators}
+%=============================================================================
+
+Table~\ref{tab:indicators} reports the structural indicators computed at
+the March~17, 2026 calibration point.
+
+\begin{table}[H]
+\centering
+\caption{Structural indicators (March 17, 2026).}
+\label{tab:indicators}
+\begin{tabular}{@{}llc@{}}
+\toprule
+\textbf{Indicator} & \textbf{Interpretation} & \textbf{Value} \\
+\midrule
+$\pi_0$ & Current log-premium & 0.242 \\
+ILE & Implied leverage elasticity (Delta) & 1.49 \\
+TEE & Total equity elasticity (Adj.\ Delta) & $-2.11$ \\
+PMRI & Premium mean-reversion index (Theta) & $-0.71$ \\
+IBGR & Implied BTC growth rate (Moneyness) & 17.6\% \\
+\midrule
+IFRD mean & Implied funding requirement (3y) & \$35.3B \\
+IFRD $p_{95}$ & 95th percentile & \$71.8B \\
+\midrule
+Survival $(\varepsilon=0)$ & $\Pr(A_t > D_t + P_t^{\mathrm{liq}},\;\forall t \le 3\text{y})$ & 91.9\% \\
+Survival $(\varepsilon=10\%)$ & With 10\% buffer & 89.1\% \\
+\midrule
+DCR (current) & Dividend coverage ratio & 49.2$\times$ \\
+DCR (3y mean) & Mean over simulation paths & 113.7$\times$ \\
+$\Pr(\text{DCR} < 1)$ & Probability of under-coverage (3y) & 1.0\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Interpretation.}
+The ILE of 1.49 indicates moderate leverage: a 1\% BTC decline erodes
+equity by $\sim$1.49\%.  The negative TEE of $-2.11$ reflects the
+dominant premium compression channel ($\gamma_{\pi S} = -3.60$):
+at the margin, MSTR equity moves \emph{inversely} to BTC, a regime
+where premium decay overwhelms leverage.
+
+The PMRI of $-0.71$ places the current premium 0.71 standard deviations
+below its long-run mean, conferring positive expected carry.  The IBGR
+of 17.6\% indicates the accumulation option is significantly in the
+money---the flywheel is actively spinning through discrete purchases.
+
+The IFRD mean of \$35.3B quantifies the capital that must be raised
+over three years to sustain the implied growth, with a 95th-percentile
+scenario of \$71.8B.  Survival probability of 91.9\% indicates that
+the probability of NAV breaching zero (assets falling below
+debt-plus-preferred) is 8.1\% over three years---non-trivial but
+moderate.  The dividend coverage ratio of 49.2$\times$ (current assets
+minus debt divided by annual preferred dividends) provides ample
+headroom, with only a 1\% probability of under-coverage in simulation.
+
+%=============================================================================
+\subsection{Capital Structure Visualisation}\label{sec:capstruct_viz}
+%=============================================================================
+
+Figure~\ref{fig:capital_structure} shows the priority waterfall.  Debt
+(\$8.2B) is senior, followed by five preferred tranches totalling
+\$10.2B, with common equity (\$37.8B) as the residual claim.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.7\textwidth]{capital_structure.png}
+  \caption{Capital structure priority waterfall (March 2026).
+  Debt and preferred constitute \$18.5B in senior claims against
+  \$56.3B in BTC assets.}
+  \label{fig:capital_structure}
+\end{figure}
+
+Figure~\ref{fig:assets_debt_nav} shows the evolution of the capital stack
+over the full sample.  BTC assets grew from $\sim$\$3B in early 2021 to
+\$56.3B by March~2026, with debt increasing in step-function increments
+(convertible issuances) and preferred stock appearing from mid-2025.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{assets_debt_nav.png}
+  \caption{BTC assets, debt, preferred stock, and NAV (2021--2026).}
+  \label{fig:assets_debt_nav}
+\end{figure}
+
+%=============================================================================
+\subsection{Premium Dynamics}\label{sec:premium_dynamics}
+%=============================================================================
+
+Figure~\ref{fig:premium_ts} displays the premium time series.  The premium
+was relatively stable at 20--25\% through 2021--2024, spiked dramatically
+in Q4~2024 (exceeding 200\% during the BTC rally to \$100K+), and has
+since decayed toward the current level of 24.2\%.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{premium_timeseries.png}
+  \caption{Log-premium $\pi_t$ (2021--2026).  The OU long-run mean
+  $\hat\theta = 1.08$ reflects the full-sample average including
+  the Q4~2024 spike.}
+  \label{fig:premium_ts}
+\end{figure}
+
+%=============================================================================
+\subsection{Leverage and Equity Elasticity}\label{sec:ile_tee}
+%=============================================================================
+
+Figure~\ref{fig:ile_tee} shows the ILE and TEE time series.  Both spiked
+dramatically in 2024 during periods of high leverage (when NAV was
+compressed) and have since stabilised at moderate levels.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{ile_tee_timeseries.png}
+  \caption{ILE (leverage Delta) and TEE (total Delta), 2024--2026.}
+  \label{fig:ile_tee}
+\end{figure}
+
+%=============================================================================
+\subsection{BTC Per Share}\label{sec:btc_per_share}
+%=============================================================================
+
+Figure~\ref{fig:btc_per_share} tracks BTC per share over time.  The measure
+was stable at $\sim$0.013 BTC/share through 2021--2024, with a
+discontinuity at the August~2024 10-for-1 split.  Post-split, the
+per-share holding is $\sim$0.0024, reflecting both the split adjustment
+and the dilution from preferred stock issuance.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{btc_per_share_timeseries.png}
+  \caption{BTC per share (2021--2026).  Vertical line marks the
+  10-for-1 stock split (August 8, 2024).}
+  \label{fig:btc_per_share}
+\end{figure}
+
+%=============================================================================
+\subsection{Implied Funding Requirement Distribution}\label{sec:ifrd_results}
+%=============================================================================
+
+Figure~\ref{fig:ifrd} shows the Monte Carlo distribution of the three-year
+cumulative funding requirement $G_{3\mathrm{y}} = \int_0^3 S_u\,dH_u$
+across 5,000 simulated paths.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.7\textwidth]{ifrd_histogram.png}
+  \caption{Implied Funding Requirement Distribution (3-year horizon,
+  5,000 paths).  Mean: \$35.3B; median: $\sim$\$30B; 95th percentile:
+  \$71.8B.}
+  \label{fig:ifrd}
+\end{figure}
+
+The right-skewed distribution reflects the compounding interaction between
+BTC price appreciation and holding growth: in bullish scenarios, both $S_t$
+and $dH_t$ increase, producing disproportionately large funding requirements.
+The 95th-percentile value of \$71.8B flags the tail scenario where capital
+markets must remain extremely accommodative.
+
+%=============================================================================
+\subsection{Theory Validation}\label{sec:theory_validation}
+%=============================================================================
+
+We assess whether the calibrated values support the theoretical predictions.
+
+\paragraph{Prediction 1: Positive premium from accumulation option.}
+The current premium $\pi_0 = 0.242 > 0$ is consistent with
+Proposition~\ref{prop:fair_premium}: Strategy has positive issuance
+capability (IBGR $= 17.6\%$) and positive NAV, so the accumulation
+option has value and the fair premium is positive.
+
+\paragraph{Prediction 2: Premium below steady-state fair value.}
+The PMRI of $-0.71$ indicates the premium is below the OU long-run mean
+$\theta = 1.08$.  Under the endogenous model, this corresponds to a
+mispricing Z-score of $-0.71$ (Definition~\ref{def:zscore}), suggesting
+moderate undervaluation---the market is not fully pricing the
+accumulation option.
+
+\paragraph{Prediction 3: Optimal financing matches premium regime.}
+The ATM accretion threshold is $\log(\mathrm{ILE}_0) = \log(1.488) = 0.397$.
+Since $\pi_0 = 0.242 < 0.397$, the model predicts ATM equity issuance is
+mildly dilutive.  This matches Strategy's observed shift away from common
+equity ATM toward preferred stock issuance in late 2025--early 2026
+(Proposition~\ref{prop:optimal_channel}).
+
+\paragraph{Prediction 4: Premium compression dampens reflexivity.}
+The negative $\gamma_{\pi S} = -3.60$ yields $\beta_{\mathrm{TOT}} = -2.11$,
+implying that the reflexive amplification factor $R_t < 1$
+(Proposition~\ref{prop:instability}).  Price impact from Strategy purchases
+is \emph{attenuated} rather than amplified at current calibration.  This
+is a stabilising regime.
+
+\paragraph{Prediction 5: Adequate survival margin.}
+The full-stack distress threshold
+$(D_0 + P_0^{\mathrm{liq}})/H_0 = \$18.45\text{B}/761{,}068 = \$24{,}200$
+is 67\% below the current BTC price of \$73,909.  The 91.9\% three-year
+survival probability (Theorem~\ref{thm:death_spiral}) indicates the
+death spiral is a low-probability tail event given current market
+conditions.
+
+\paragraph{Prediction 6: Procyclical leverage.}
+The theoretical prediction that leverage falls in bull markets and rises in
+bear markets (Proposition~\ref{prop:procyclical}) is confirmed by the
+ILE time series (Figure~\ref{fig:ile_tee}): ILE spiked during the
+2024 drawdown and compressed as BTC recovered.

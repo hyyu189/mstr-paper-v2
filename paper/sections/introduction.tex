@@ -1,0 +1,99 @@
+%!TEX root = ../main.tex
+
+\section{Introduction}\label{sec:introduction}
+
+Strategy Incorporated (ticker: MSTR) holds 761,068 Bitcoin---approximately
+3.8\% of the circulating supply---valued at \$56.25 billion as of March~2026.
+Its equity trades at a persistent premium to net asset value: the market
+capitalisation exceeds the mark-to-market value of the BTC holdings minus
+liabilities.  This premium, which has ranged from near zero to over 200\%,
+represents one of the most striking pricing anomalies in modern corporate
+finance.  Yet no structural theory explains \emph{what} the fair premium
+should be, \emph{when} it is justified, or \emph{how} it interacts with the
+firm's capital structure decisions.
+
+This paper fills the gap.  We develop a theory in which the NAV premium
+is endogenous: it equals the present value of a \emph{perpetual accumulation
+option}---the right to issue equity at a premium to NAV and deploy the
+proceeds to purchase BTC, thereby increasing BTC-per-share for existing
+holders.  The key insight is that this option is self-referential: the premium
+that justifies the option is itself sustained by the option's value.  This
+reflexive structure generates rich equilibrium dynamics, including multiple
+stable equilibria and path-dependent transitions.
+
+\paragraph{Contributions.}
+The paper makes five contributions to the literature on alternative-asset
+holding companies and crypto-finance:
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Endogenous premium theory with reflexivity.}
+    We derive a fixed-point equation for the fair premium
+    $\pi^\star$ that links it to BTC volatility, issuance intensity,
+    leverage, and discount rates (Proposition~\ref{prop:fair_premium},
+    Proposition~\ref{prop:steady_state}).  The closed-form steady-state
+    approximation connects to the Black--Scholes call-option formula,
+    providing both analytical tractability and economic intuition.
+
+  \item \textbf{Multiple equilibria and death spiral.}
+    The reflexive feedback loop creates three equilibria: a high-premium
+    ``flywheel'' (virtuous cycle of issuance and accumulation), an unstable
+    tipping point, and a low-premium spiral
+    (Theorem~\ref{thm:three_equilibria}).  Transitions between equilibria
+    exhibit hysteresis via saddle-node bifurcations
+    (Proposition~\ref{prop:hysteresis}), and we characterise the death
+    spiral mechanism formally (Theorem~\ref{thm:death_spiral}).
+
+  \item \textbf{Greeks reinterpretation.}
+    We show that five structural indicators---Implied Leverage Elasticity
+    (ILE), Total Equity Elasticity (TEE), Premium Mean-Reversion Index
+    (PMRI), Implied BTC Growth Rate (IBGR), and Implied Funding
+    Requirement Distribution (IFRD)---map precisely onto the option Greeks
+    of the embedded accumulation claim: Delta, Adjusted Delta, Theta,
+    Moneyness, and Exercise Cost (Table~\ref{tab:greek-map}).  We further
+    introduce Vega and Rho as new sensitivity measures.
+
+  \item \textbf{Optimal capital structure.}
+    We derive a premium-dependent financing rule that determines the
+    cost-minimising channel among ATM equity, convertible debt, and
+    preferred stock as a function of the log-premium
+    (Proposition~\ref{prop:optimal_channel}).  We introduce the Weighted
+    Average Cost of BTC Acquisition (WACBA) and characterise endogenous
+    procyclical leverage dynamics (Proposition~\ref{prop:procyclical}).
+    Strategy's observed financing behaviour---shifting from equity to
+    convertibles to preferred stock as the premium declined through
+    2025--2026---closely matches the model's predictions.
+
+  \item \textbf{Empirical calibration through 2026.}
+    We calibrate the model to a comprehensive daily panel of BTC prices,
+    MSTR equity data, holdings, debt, and five series of preferred stock
+    (STRK, STRF, STRC, STRD, STRE).  The calibrated premium process has
+    mean-reversion speed $\hat\kappa = 5.21$ and long-run mean
+    $\hat\theta = 1.08$, with BTC volatility of 48.6\%.  The current
+    premium of 24.2\% sits well below the long-run mean
+    ($\text{PMRI} = -0.71$), implying positive carry.
+    Monte Carlo simulation with 5,000 paths yields a 91.9\% three-year
+    survival probability, mean implied funding requirement of \$35.3B, and
+    preferred dividend coverage ratio of $49\times$ currently.
+\end{enumerate}
+
+\paragraph{Broader implications.}
+The framework applies beyond MSTR to any corporate treasury vehicle that
+holds a volatile asset and issues securities to fund accumulation---including
+the growing cohort of public companies adding BTC to their balance sheets.
+Our market impact analysis (Section~\ref{sec:market_impact_theory})
+formalises the systemic risk from corporate BTC concentration and derives
+conditions for contagion cascades among leveraged holders.
+
+\paragraph{Outline.}
+Section~\ref{sec:literature} reviews related literature.
+Section~\ref{sec:theory} develops the theoretical framework:
+the accumulation option (Section~\ref{sec:fair_premium}),
+reflexivity and multiple equilibria (Section~\ref{sec:multiple_equilibria}),
+indicators as Greeks (Section~\ref{sec:greeks}),
+MSTR vs.\ BTC ETF comparison (Section~\ref{sec:etf_comparison}),
+optimal capital structure (Section~\ref{sec:optimal_capital}),
+and market impact (Section~\ref{sec:market_impact_theory}).
+Section~\ref{sec:empirical} describes the data and estimation.
+Section~\ref{sec:results} presents calibrated results.
+Section~\ref{sec:discussion} discusses implications and limitations.
+Section~\ref{sec:conclusion} concludes.
