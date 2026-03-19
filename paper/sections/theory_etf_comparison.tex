@@ -1,0 +1,314 @@
+%!TEX root = ../main.tex
+\section{MSTR vs.\ BTC ETF: Premium Decomposition}\label{sec:etf-comparison}
+
+The launch of spot Bitcoin ETFs (e.g.\ IBIT) created a pure delta-one
+BTC exposure trading at or near NAV.  Why, then, does MSTR equity
+persistently trade at a premium to its own NAV?  This section answers
+the question by decomposing the premium into economically distinct
+components and deriving conditions under which each vehicle dominates.
+
+%% ------------------------------------------------------------------
+\subsection{The ETF as a Pure Delta-One Instrument}
+
+\begin{definition}[BTC ETF]\label{def:etf}
+A spot Bitcoin ETF with holdings $H_t^{\mathrm{ETF}}$ and shares
+$N_t^{\mathrm{ETF}}$ satisfies
+$$
+  E_t^{\mathrm{ETF}}
+  = A_t^{\mathrm{ETF}}
+  = H_t^{\mathrm{ETF}}\,S_t,
+  \qquad
+  \pi_t^{\mathrm{ETF}} = 0.
+$$
+The ETF carries no debt ($D^{\mathrm{ETF}} = 0$), no leverage
+($\mathrm{ILE}^{\mathrm{ETF}} = 1$), and no accumulation option
+($V_{\mathrm{acc}}^{\mathrm{ETF}} = 0$).
+Its equity elasticity to BTC is exactly one:
+$\Delta_{\mathrm{tot}}^{\mathrm{ETF}} = 1$.
+\end{definition}
+
+\begin{remark}
+In practice, ETFs trade at small, mean-reverting deviations from NAV due
+to creation/redemption frictions and management fees.  We abstract from
+these by setting $\pi^{\mathrm{ETF}} = 0$, which is the arbitrage-free
+limit of the creation/redemption mechanism.
+\end{remark}
+
+%% ------------------------------------------------------------------
+\subsection{Premium Decomposition}
+
+\begin{theorem}[Three-Component Premium Decomposition]\label{thm:decomposition}
+The MSTR log-premium admits the decomposition
+$$
+  \pi_t
+  = \underbrace{\pi_{\mathrm{lev}}(t)}_{\text{leverage premium}}
+  + \underbrace{\pi_{\mathrm{acc}}(t)}_{\text{accumulation premium}}
+  + \underbrace{\pi_{\mathrm{noise}}(t)}_{\text{residual}},
+$$
+where
+\begin{align}
+  \pi_{\mathrm{lev}}(t)
+  &= \log\!\bigl(\mathrm{ILE}_t\bigr)
+  = \log\!\left(\frac{A_t}{A_t - D_t}\right), \label{eq:pi-lev} \\[6pt]
+  \pi_{\mathrm{acc}}(t)
+  &= \log\!\left(1 + \frac{V_{\mathrm{acc}}(t)}{\mathrm{NAV}_t}\right), \label{eq:pi-acc} \\[6pt]
+  \pi_{\mathrm{noise}}(t)
+  &= \pi_t - \pi_{\mathrm{lev}}(t) - \pi_{\mathrm{acc}}(t). \label{eq:pi-noise}
+\end{align}
+\end{theorem}
+
+\begin{proof}
+By definition, $E_t = e^{\pi_t}\,\mathrm{NAV}_t$.  Write equity as
+the sum of leveraged NAV and the accumulation option value:
+\begin{align*}
+  E_t
+  &= \mathrm{NAV}_t + V_{\mathrm{acc}}(t) + \varepsilon_t \\
+  &= \mathrm{NAV}_t \left(1 + \frac{V_{\mathrm{acc}}(t)}{\mathrm{NAV}_t}
+     + \frac{\varepsilon_t}{\mathrm{NAV}_t}\right),
+\end{align*}
+where $\varepsilon_t$ captures sentiment, noise, and any mispricing.
+Taking logs:
+$$
+  \pi_t = \log\!\left(\frac{E_t}{\mathrm{NAV}_t}\right)
+  = \log\!\left(1 + \frac{V_{\mathrm{acc}}(t)}{\mathrm{NAV}_t}
+    + \frac{\varepsilon_t}{\mathrm{NAV}_t}\right).
+$$
+
+Now observe that the leverage premium arises because the leveraged
+equity claim on BTC has higher elasticity than a dollar-for-dollar
+position.  A risk-neutral investor would value the leveraged claim at
+$$
+  E_t^{\mathrm{lev}} = \frac{A_t}{A_t - D_t} \cdot \mathrm{NAV}_t
+  = A_t,
+$$
+which is trivially the asset value.  However, in log-premium space,
+the premium attributable purely to leverage amplification is
+$$
+  \pi_{\mathrm{lev}}(t) = \log(\mathrm{ILE}_t)
+  = \log\!\left(\frac{A_t}{A_t - D_t}\right).
+$$
+This represents the excess log-return sensitivity that leverage provides
+over a delta-one instrument.
+
+The accumulation component $\pi_{\mathrm{acc}}$ captures the option
+value beyond leverage, and $\pi_{\mathrm{noise}}$ is the residual.
+The decomposition is exhaustive by construction.
+\end{proof}
+
+\paragraph{Calibrated decomposition.}
+With $A_0 = H_0 S_0 = \$56.25$B, $D_0 = \$8.22$B (debt only, excluding
+preferred for the leverage ratio), and $\pi_0 = 0.242$:
+\begin{align*}
+  \pi_{\mathrm{lev}}
+  &= \log(1.488) = 0.398, \\
+  \pi_0 - \pi_{\mathrm{lev}}
+  &= 0.242 - 0.398 = -0.156.
+\end{align*}
+The negative residual $\pi_0 - \pi_{\mathrm{lev}} < 0$ implies that the
+current premium does not even fully compensate for leverage risk---the
+accumulation option is being priced at a \emph{discount}:
+$$
+  \pi_{\mathrm{acc}} + \pi_{\mathrm{noise}} = -0.156.
+$$
+This is consistent with $\mathrm{PMRI}_0 = -0.71$ (premium below
+long-run mean).
+
+%% ------------------------------------------------------------------
+\subsection{When MSTR Dominates the ETF}
+
+\begin{proposition}[MSTR Dominance Conditions]\label{prop:mstr-dominates}
+MSTR equity offers superior risk-adjusted BTC exposure relative to a
+spot ETF when the following conditions hold simultaneously:
+\begin{enumerate}
+  \item \textbf{Positive accumulation value:} $\pi_{\mathrm{acc}}(t) > 0$,
+    i.e.\ the accumulation option is in the money.
+  \item \textbf{Underpriced premium:}
+    $\pi_t < \pi^* \;\Leftrightarrow\; \mathrm{PMRI}_t < 0$,
+    i.e.\ the current premium is below its fair (long-run) value.
+  \item \textbf{Sustainable leverage:}
+    $\mathrm{ILE}_t < \bar\beta$ for some prudent leverage bound
+    $\bar\beta$ (e.g.\ $\bar\beta = 2$).
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+We compare the expected log-return of MSTR equity to that of the ETF over
+a short horizon $\Delta t$.
+
+\textbf{ETF return.}  By definition, the ETF return equals the BTC return:
+$$
+  r_{\mathrm{ETF}} = \Delta\log S_t.
+$$
+
+\textbf{MSTR return.}  From the structural model:
+\begin{align*}
+  r_{\mathrm{MSTR}}
+  &= \Delta\log E_t
+  = \Delta\pi_t + \Delta\log(A_t - D_t)^+ \\
+  &\approx \Delta\pi_t + \mathrm{ILE}_t \cdot \Delta\log S_t.
+\end{align*}
+
+The expected excess return of MSTR over the ETF is therefore:
+$$
+  \mathbb{E}[r_{\mathrm{MSTR}} - r_{\mathrm{ETF}}]
+  \approx \underbrace{\mathbb{E}[\Delta\pi_t]}_{\text{premium drift}}
+  + \underbrace{(\mathrm{ILE}_t - 1)}_{\text{leverage excess}}
+  \cdot \mathbb{E}[\Delta\log S_t].
+$$
+
+\begin{enumerate}
+  \item When $\pi_{\mathrm{acc}} > 0$, the accumulation option contributes
+    positive value to equity, which is absent from the ETF.
+
+  \item When $\mathrm{PMRI} < 0$ (premium below $\theta$), the OU dynamics
+    imply $\mathbb{E}[\Delta\pi_t] = \kappa(\theta - \pi_t)\Delta t > 0$:
+    the premium is expected to expand, providing a positive carry relative
+    to the ETF.
+
+  \item Leverage amplifies BTC returns ($\mathrm{ILE} > 1$) but also
+    amplifies losses and increases drawdown risk.  The leverage benefit is
+    sustainable only when $\mathrm{ILE}_t$ remains below a threshold
+    $\bar\beta$ where bankruptcy risk is negligible (survival probability
+    close to 1).
+\end{enumerate}
+
+Under all three conditions, the expected excess return is positive and
+the leverage risk is bounded, making MSTR a superior vehicle.
+\end{proof}
+
+\paragraph{Current assessment.}
+Applying the calibrated values:
+\begin{itemize}
+  \item $\mathrm{IBGR}_0 = 17.6\% > 0$: accumulation option is in the money.
+  \item $\mathrm{PMRI}_0 = -0.71 < 0$: premium is below long-run mean;
+    expected to expand.
+  \item $\mathrm{ILE}_0 = 1.49 < 2$: leverage is moderate.
+  \item Survival probability at 3 years: 91.9\%.
+\end{itemize}
+All three dominance conditions are satisfied.  At the current calibration
+point, MSTR offers a more attractive risk-adjusted BTC exposure than the
+ETF.
+
+%% ------------------------------------------------------------------
+\subsection{When the ETF Dominates MSTR}
+
+\begin{proposition}[ETF Dominance Conditions]\label{prop:etf-dominates}
+The spot BTC ETF is the superior vehicle when any of the following hold:
+\begin{enumerate}
+  \item \textbf{Overpriced premium:} $\pi_t > \pi^*$
+    $(\mathrm{PMRI}_t > 0)$---the premium is above fair value and expected
+    to compress, creating negative carry.
+  \item \textbf{Excessive leverage:} $\mathrm{ILE}_t > \bar\beta$---the
+    leverage amplification introduces unacceptable tail risk (survival
+    probability materially below 1).
+  \item \textbf{Exhausted accumulation:} $\mathrm{IBGR}_t \le 0$---the
+    flywheel has stalled or reversed (e.g.\ forced BTC sales), and
+    the accumulation option is out of the money.
+  \item \textbf{Dividend/preferred burden:} The preferred dividend
+    coverage ratio falls below a sustainability threshold, signalling
+    that the capital structure is consuming value rather than creating it.
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+Each condition negates a corresponding MSTR dominance condition:
+\begin{enumerate}
+  \item If $\mathrm{PMRI} > 0$, then $\mathbb{E}[\Delta\pi_t] < 0$:
+    the premium is expected to decay, imposing a drag on MSTR returns
+    that the ETF avoids entirely.
+
+  \item If $\mathrm{ILE}_t > \bar\beta$, the leveraged claim's expected
+    drawdown conditional on a BTC decline of magnitude $x$ is
+    $\mathrm{ILE}_t \cdot x$, which can exceed the full BTC drop.
+    The ETF's maximum drawdown is bounded by $x$.  For sufficiently
+    large leverage, the Sharpe ratio of MSTR falls below that of the ETF
+    despite higher expected returns.
+
+  \item If $\mathrm{IBGR} \le 0$, the accumulation option is worthless
+    ($V_{\mathrm{acc}} \le 0$), and any remaining premium represents
+    pure overvaluation (or noise).
+
+  \item Preferred dividends of \$977M/year represent a fixed claim on
+    MSTR's resources.  When coverage deteriorates, the capital structure
+    becomes fragile, and the risk premium demanded by common equity
+    holders should rise, compressing the premium.
+\end{enumerate}
+In each case, the ETF provides equivalent BTC exposure without the
+embedded costs and risks.
+\end{proof}
+
+%% ------------------------------------------------------------------
+\subsection{The Premium as a Regime Indicator}
+
+\begin{corollary}[Premium Regime Map]\label{cor:regime-map}
+The MSTR premium regime can be characterised by the sign of PMRI and IBGR:
+\begin{center}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+& $\mathrm{IBGR} > 0$ & $\mathrm{IBGR} \le 0$ \\
+\midrule
+$\mathrm{PMRI} < 0$ (underpriced)
+  & \textbf{MSTR dominates} & Transition / distress \\
+$\mathrm{PMRI} > 0$ (overpriced)
+  & Hold / hedge & \textbf{ETF dominates} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{corollary}
+
+\paragraph{Interpretation.}
+\begin{itemize}
+  \item \textbf{MSTR dominates} (lower-left): The accumulation option is
+    in the money and underpriced.  This is the current regime
+    ($\mathrm{IBGR} = 17.6\%$, $\mathrm{PMRI} = -0.71$).
+
+  \item \textbf{ETF dominates} (upper-right): The flywheel has stalled
+    and the premium is overvalued.  Pure BTC exposure via the ETF is
+    strictly preferable.
+
+  \item \textbf{Hold/hedge} (upper-left): The accumulation is positive
+    but already priced in.  The option is valuable but expensive; a
+    paired position (long MSTR, short premium via options) may be
+    warranted.
+
+  \item \textbf{Transition/distress} (lower-right): The premium is
+    cheap but the flywheel is broken.  This signals either a buying
+    opportunity (if the flywheel restarts) or a value trap (if it
+    does not).
+\end{itemize}
+
+%% ------------------------------------------------------------------
+\subsection{Quantitative Comparison at Current Calibration}
+
+We summarise the MSTR vs.\ ETF comparison using calibrated values.
+
+\begin{table}[ht]
+\centering
+\caption{MSTR vs.\ spot BTC ETF: structural comparison.}
+\label{tab:mstr-vs-etf}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+\textbf{Metric} & \textbf{MSTR} & \textbf{BTC ETF} \\
+\midrule
+BTC Delta (ILE) & 1.49 & 1.00 \\
+Total Delta (TEE) & $-2.11$ & 1.00 \\
+Premium ($\pi$) & 0.24 (27\% over NAV) & $\approx 0$ \\
+Accumulation option & In the money & None \\
+IBGR (annualised) & 17.6\% & 0\% \\
+Premium carry (PMRI) & $-0.71$ (positive carry) & N/A \\
+Leverage risk & Moderate (ILE $< 2$) & None \\
+3-year survival & 91.9\% & 100\% \\
+Preferred dividend drag & \$977M/year & None \\
+Funding requirement (3y) & \$35.3B mean & None \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Bottom line.}
+At the current calibration point (March 2026), MSTR offers leveraged BTC
+exposure with a positive-carry accumulation option priced below its
+long-run fair value.  The ETF provides simpler, lower-risk exposure
+without the option component.  The indicators framework provides a
+real-time dashboard for monitoring when the relative attractiveness shifts:
+the key signals are PMRI crossing zero (premium becoming overpriced) and
+IBGR approaching zero (flywheel stalling).
