@@ -1,0 +1,382 @@
+%!TEX root = ../main.tex
+\section{Structural Indicators as Option Greeks}\label{sec:greeks}
+
+The structural relation $E_t = e^{\pi_t}(A_t - D_t)^+$ endows MSTR equity with an
+option-like payoff on Bitcoin.  If the NAV premium $\pi_t$ encodes the value of the
+``accumulation option''---the right to issue equity at a premium and buy BTC
+accretively---then the five indicators derived in Section~\ref{sec:indicators}
+are precisely the option Greeks of this embedded claim.
+
+This section formalises the mapping, derives each Greek from the structural model,
+and introduces two new sensitivity measures.
+
+%% ------------------------------------------------------------------
+\subsection{The Accumulation Option}
+
+\begin{definition}[Accumulation Option Value]\label{def:acc-option}
+Define the \emph{accumulation option value} as the excess of equity market value
+over net asset value:
+$$
+  V_{\mathrm{acc}}(t) \;=\; E_t - \mathrm{NAV}_t
+  \;=\; \bigl(e^{\pi_t} - 1\bigr)(A_t - D_t)^+.
+$$
+When $\pi_t > 0$ the option is ``in the money'': the market assigns positive
+value to management's ability to grow BTC holdings accretively.
+When $\pi_t \le 0$ the option is worthless and equity trades at or below NAV.
+\end{definition}
+
+%% ------------------------------------------------------------------
+\subsection{ILE as Delta}\label{ssec:ile-delta}
+
+\begin{proposition}[ILE $\equiv$ Leverage Delta]\label{prop:ile-delta}
+Let $E_t = e^{\pi_t}(H_t S_t - D_t)^+$ with $\pi_t$ held fixed.  Then
+$$
+  \Delta_{\mathrm{lev}}(t)
+  \;=\;
+  \frac{\partial \log E_t}{\partial \log S_t}\bigg|_{\pi_t}
+  \;=\;
+  \frac{A_t}{A_t - D_t}
+  \;=\;
+  \mathrm{ILE}_t.
+$$
+\end{proposition}
+
+\begin{proof}
+With $\pi_t$ fixed, $\log E_t = \pi_t + \log(H_t S_t - D_t)$.  Differentiating
+with respect to $\log S_t$ (holding $H_t, D_t$ constant):
+$$
+  \frac{\partial \log E_t}{\partial \log S_t}
+  = \frac{H_t S_t}{H_t S_t - D_t}
+  = \frac{A_t}{A_t - D_t}
+  = \beta_{LS}(t)
+  = \mathrm{ILE}_t.
+$$
+\end{proof}
+
+\paragraph{Economic intuition.}
+Delta measures how much equity moves per unit BTC move.  Leverage amplifies
+exposure exactly as a deep in-the-money call does: the higher the
+debt-to-asset ratio, the larger $\Delta_{\mathrm{lev}}$.  With current
+calibration,
+$$
+  \mathrm{ILE}_0 = 1.49,
+$$
+implying that a 1\% move in BTC produces approximately a 1.49\% move in
+MSTR equity from balance-sheet leverage alone---comparable to a call with
+$\Delta > 1$ when expressed in log-return terms.
+
+%% ------------------------------------------------------------------
+\subsection{TEE as Adjusted Delta}\label{ssec:tee-adj-delta}
+
+\begin{proposition}[TEE $\equiv$ Total (Adjusted) Delta]\label{prop:tee-delta}
+Let $\gamma_{\pi S}$ denote the empirical sensitivity of the log-premium to
+BTC log-returns.  The total equity elasticity
+$$
+  \Delta_{\mathrm{tot}}(t)
+  = \frac{d\log E_t}{d\log S_t}
+  = \gamma_{\pi S} + \mathrm{ILE}_t
+  = \mathrm{TEE}_t
+$$
+is the \emph{adjusted delta} that incorporates the premium channel.
+\end{proposition}
+
+\begin{proof}
+From $\log E_t = \pi_t + \log(A_t - D_t)^+$, the total derivative with respect
+to $\log S_t$ is
+$$
+  \frac{d\log E_t}{d\log S_t}
+  = \underbrace{\frac{d\pi_t}{d\log S_t}}_{\gamma_{\pi S}}
+  + \underbrace{\frac{A_t}{A_t - D_t}}_{\mathrm{ILE}_t}.
+$$
+\end{proof}
+
+\paragraph{Economic intuition.}
+When BTC rises, the premium typically \emph{compresses} ($\gamma_{\pi S} < 0$):
+the market discounts the option as the stock already moved.  This dampening
+is analogous to the delta of an option declining as the underlying moves away
+from the strike.  With calibrated values,
+$$
+  \mathrm{TEE}_0 = \gamma_{\pi S} + \mathrm{ILE}_0
+  = -3.60 + 1.49 = -2.11,
+$$
+indicating that net equity actually moves \emph{inversely} to BTC at the margin---
+a regime where premium compression dominates leverage.
+
+\begin{remark}
+The negative TEE is consistent with the empirical observation that in periods of
+rapidly falling premium, MSTR equity can underperform BTC even on up-days.
+The sign of $\gamma_{\pi S}$ is regime-dependent; in premium-expansion regimes
+$\gamma_{\pi S} > 0$ and TEE exceeds ILE.
+\end{remark}
+
+%% ------------------------------------------------------------------
+\subsection{PMRI as Theta}\label{ssec:pmri-theta}
+
+\begin{proposition}[PMRI $\equiv$ Premium Theta]\label{prop:pmri-theta}
+Under the OU dynamics $d\pi_t = \kappa(\theta - \pi_t)\,dt + \sigma_\pi\,dW_t^{\pi}$,
+the standardised expected premium decay is
+$$
+  \Theta_{\pi}(t)
+  = \frac{\pi_t - \theta}{\sigma_{\mathrm{stat}}}
+  = \mathrm{PMRI}_t,
+  \qquad
+  \sigma_{\mathrm{stat}} = \frac{\sigma_\pi}{\sqrt{2\kappa}}.
+$$
+\end{proposition}
+
+\begin{proof}
+The stationary distribution of the OU process is $\pi_\infty \sim
+\mathcal{N}\!\bigl(\theta,\,\sigma_\pi^2/(2\kappa)\bigr)$.
+The z-score of the current premium relative to this distribution is
+$(\pi_0 - \theta)/\sigma_{\mathrm{stat}}$, which is the PMRI by definition.
+The expected instantaneous drift is $\kappa(\theta - \pi_t)$; normalising by
+the stationary standard deviation yields a unit-free measure of the ``carry
+cost'' of the current premium level.
+\end{proof}
+
+\paragraph{Economic intuition.}
+Theta in options measures time decay---the cost of holding a position as time
+passes.  PMRI plays the same role for the accumulation option: a high
+premium ($\mathrm{PMRI} \gg 0$) signals that the premium is likely to decay,
+eroding the option value.  A negative PMRI indicates the premium is cheap
+relative to its long-run level, conferring positive carry.
+
+With calibrated parameters $\kappa = 5.21$, $\theta = 1.08$,
+$\sigma_\pi = 3.79$, and $\pi_0 = 0.24$:
+$$
+  \sigma_{\mathrm{stat}} = \frac{3.79}{\sqrt{2 \times 5.21}} = 1.175,
+  \qquad
+  \mathrm{PMRI}_0 = \frac{0.24 - 1.08}{1.175} = -0.71.
+$$
+The negative value implies the premium is \emph{below} its long-run mean,
+conferring positive expected carry---the accumulation option is ``cheap.''
+
+%% ------------------------------------------------------------------
+\subsection{IBGR as Moneyness}\label{ssec:ibgr-moneyness}
+
+\begin{proposition}[IBGR $\equiv$ Moneyness]\label{prop:ibgr-moneyness}
+The implied BTC growth rate
+$$
+  \mathrm{IBGR}_t = \mu_H(t)
+  = \frac{1}{H_t}\bigl(\alpha\,\pi_t^+ + \lambda_M\,\mathbb{E}[\Delta H]\bigr)
+$$
+measures the \emph{moneyness} of the accumulation option: how deeply in the
+money the accretive strategy is.
+\end{proposition}
+
+\begin{proof}
+The accumulation option is valuable precisely when management can grow BTC
+holdings at a rate exceeding what the market has priced.  IBGR quantifies
+this rate.  When $\mathrm{IBGR} > 0$, the option is in the money---each
+financing event is expected to add BTC.  A higher IBGR corresponds to
+deeper moneyness, as the expected BTC accretion per unit time is larger,
+making the option more valuable.
+
+Formally, the value of the accumulation option scales with IBGR through the
+premium dynamics: $V_{\mathrm{acc}} \propto \mathbb{E}\bigl[\int_0^T
+e^{-rs}(e^{\pi_s}-1)(A_s - D_s)^+\,ds\bigr]$, and $\pi_s$ is sustained at
+high levels precisely when holdings grow fast (the flywheel), i.e.\ when
+$\mu_H$ is large.
+\end{proof}
+
+\paragraph{Economic intuition.}
+Just as an option's moneyness (ratio of underlying to strike) determines
+its intrinsic value, IBGR determines the ``intrinsic accretion'' embedded in
+the stock.  With the current calibration:
+$$
+  \mathrm{IBGR}_0
+  = \frac{1}{761{,}068}\bigl(0 + 19.05 \times 7{,}044\bigr)
+  = 17.6\%\;\text{annualised},
+$$
+indicating the accumulation option is significantly in the money.
+
+%% ------------------------------------------------------------------
+\subsection{IFRD as Exercise Cost}\label{ssec:ifrd-strike}
+
+\begin{proposition}[IFRD $\equiv$ Exercise Cost]\label{prop:ifrd-strike}
+The implied funding requirement distribution
+$$
+  G_T = \int_0^T S_u\,dH_u
+$$
+is the \emph{exercise cost} of the accumulation option---the total capital
+that must be deployed to realise the implied BTC growth.
+\end{proposition}
+
+\begin{proof}
+In a standard call option, the strike price $K$ is the cost of exercising.
+For the accumulation option, there is no single exercise event; instead,
+management continuously ``exercises'' by purchasing BTC.  The cumulative
+dollar cost $G_T$ is the stochastic analogue of the strike.  Its distribution
+under $\mathbb{P}$ (the IFRD) characterises the uncertainty in this
+exercise cost.
+
+From the simulation under calibrated dynamics:
+\begin{align*}
+  \mathbb{E}[G_{3\mathrm{y}}] &= \$35.3\text{B}, \\
+  G_{3\mathrm{y}}^{95\%} &= \$71.8\text{B}.
+\end{align*}
+\end{proof}
+
+\paragraph{Economic intuition.}
+The IFRD answers: ``How much capital must be raised to keep the flywheel
+spinning?''  Like a strike price, it determines whether exercising the option
+is economically rational.  If the premium-adjusted equity issuance can cover
+$G_T$ without excessive dilution, the option is worth exercising.  The
+95th-percentile IFRD of \$71.8B flags the tail scenario where capital markets
+must remain extremely accommodative.
+
+%% ------------------------------------------------------------------
+\subsection{Summary of the Greek Mapping}
+
+\begin{table}[ht]
+\centering
+\caption{Structural indicators as option Greeks.}
+\label{tab:greek-map}
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Indicator} & \textbf{Greek} & \textbf{Formula} & \textbf{Calibrated} \\
+\midrule
+ILE $= A/(A-D)$ & Delta ($\Delta_{\mathrm{lev}}$)
+  & $\partial\log E / \partial\log S\big|_\pi$
+  & $1.49$ \\[4pt]
+TEE $= \gamma_{\pi S} + \text{ILE}$ & Adjusted Delta ($\Delta_{\mathrm{tot}}$)
+  & $d\log E / d\log S$
+  & $-2.11$ \\[4pt]
+PMRI $= (\pi-\theta)/\sigma_{\mathrm{stat}}$ & Theta ($\Theta_\pi$)
+  & Premium carry cost
+  & $-0.71$ \\[4pt]
+IBGR $= \mu_H$ & Moneyness
+  & $(\alpha\pi^+ + \lambda_M\mathbb{E}[\Delta H])/H$
+  & $17.6\%$ \\[4pt]
+IFRD $= G_T$ & Exercise cost
+  & $\int S\,dH$
+  & \$35.3B (mean) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%% ------------------------------------------------------------------
+\subsection{New Greeks: Vega and Rho}\label{ssec:new-greeks}
+
+The standard option-Greek framework suggests two additional sensitivities
+absent from the original indicator set.
+
+\subsubsection{Vega: Sensitivity to BTC Volatility}
+
+\begin{definition}[Premium Vega]\label{def:vega}
+Define
+$$
+  \mathcal{V}_\pi
+  = \frac{\partial\,\pi^*}{\partial\,\sigma_S},
+$$
+where $\pi^* = \theta$ is the long-run fair premium implied by the OU
+equilibrium.
+\end{definition}
+
+\begin{proposition}[Positive Vega]\label{prop:vega}
+The accumulation option has positive vega: higher BTC volatility increases
+the fair premium.
+\end{proposition}
+
+\begin{proof}
+The accumulation option's value derives from management's ability to exploit
+periods of high premium.  Consider the premium dynamics
+$d\pi_t = \kappa(\theta - \pi_t)\,dt + \sigma_\pi\,dW_t^\pi$ with
+$\mathrm{corr}(dW^S, dW^\pi) = \rho$.
+
+Higher BTC volatility $\sigma_S$ affects the system through two channels:
+\begin{enumerate}
+  \item \textbf{Option convexity.}  The equity payoff $(A_t - D_t)^+$ is
+    convex in $S_t$.  By Jensen's inequality, higher $\sigma_S$ increases
+    the expected value of this payoff, justifying a higher equilibrium
+    premium.  Formally, for the leveraged claim:
+    $$
+      \mathbb{E}\bigl[(H S_T - D)^+\bigr]
+      \;\text{is increasing in } \sigma_S,
+    $$
+    by standard option-pricing monotonicity.
+
+  \item \textbf{Flywheel optionality.}  Higher $\sigma_S$ generates more
+    frequent episodes of extreme BTC appreciation, during which the premium
+    expands ($\pi_t \uparrow$) and management issues equity to buy BTC.
+    The drift term $\alpha\,\pi_t^+$ in holdings dynamics implies that
+    higher vol creates more accumulation opportunities.
+\end{enumerate}
+
+Both channels push the fair premium $\pi^*$ upward with $\sigma_S$, yielding
+$\mathcal{V}_\pi > 0$.
+\end{proof}
+
+\paragraph{Calibration.}
+To estimate $\mathcal{V}_\pi$ numerically, we perturb $\sigma_S$ by
+$\pm 5\%$ around the calibrated value $\hat\sigma_S = 0.487$ and re-run the
+Monte Carlo simulation to obtain the equilibrium premium in each scenario.
+The finite-difference estimate is
+$$
+  \hat{\mathcal{V}}_\pi
+  = \frac{\pi^*(\sigma_S + \delta) - \pi^*(\sigma_S - \delta)}{2\delta}.
+$$
+
+\paragraph{Interpretation.}
+Positive vega explains why MSTR's premium tends to be elevated in
+high-volatility BTC regimes: the accumulation option becomes more
+valuable when the underlying is more volatile, exactly as for standard
+options.
+
+\subsubsection{Rho: Sensitivity to Interest Rates}
+
+\begin{definition}[Premium Rho]\label{def:rho-premium}
+Define
+$$
+  \mathcal{R}_\pi
+  = \frac{\partial\,\pi^*}{\partial\,r},
+$$
+where $r$ is the risk-free rate (or, more precisely, MSTR's cost of debt
+capital).
+\end{definition}
+
+\begin{proposition}[Negative Rho]\label{prop:rho-negative}
+The accumulation option has negative rho: higher interest rates decrease
+the fair premium.
+\end{proposition}
+
+\begin{proof}
+Higher rates affect the accumulation option through three channels:
+\begin{enumerate}
+  \item \textbf{Debt servicing cost.}  MSTR's debt $D_t$ carries interest.
+    Higher $r$ increases the carrying cost of leverage, reducing the net
+    benefit of the leveraged BTC position and narrowing the region where
+    $A_t > D_t$.
+
+  \item \textbf{Financing cost.}  The flywheel requires capital market
+    access.  Higher rates increase the cost of new debt issuance and
+    reduce the attractiveness of convertible offerings, slowing the
+    expected BTC accumulation rate $\mu_H$.
+
+  \item \textbf{Discount rate.}  The present value of future accumulation
+    benefits is discounted at a higher rate, reducing $V_{\mathrm{acc}}$
+    and hence the equilibrium premium.
+\end{enumerate}
+
+Formally, in the reduced-form OU model, $\theta$ is determined in
+equilibrium by market pricing of these factors.  Holding other parameters
+fixed, an increase in $r$ compresses the equilibrium premium:
+$\partial\theta/\partial r < 0$.  Since $\pi^* = \theta$, we obtain
+$\mathcal{R}_\pi < 0$.
+\end{proof}
+
+\paragraph{Calibration.}
+As with vega, $\mathcal{R}_\pi$ can be estimated by perturbing the
+risk-free rate in the simulation.  The preferred dividend obligations
+(\$977M annually at current calibration) make the rate sensitivity
+particularly acute: higher rates increase the probability that the
+dividend coverage ratio falls below one, threatening the sustainability
+of the capital structure.
+
+\begin{remark}
+The sign conventions match standard equity-option Greeks: a leveraged
+long position has positive delta, positive vega, and (for puts or
+leveraged structures with debt) negative rho.  The accumulation option
+adds the novel feature that theta is endogenous---management can
+influence it through the flywheel.
+\end{remark}
