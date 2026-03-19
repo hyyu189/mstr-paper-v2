@@ -1,0 +1,170 @@
+%!TEX root = ../main.tex
+
+\section{Empirical Framework}\label{sec:empirical}
+
+%=============================================================================
+\subsection{Data}\label{sec:data}
+%=============================================================================
+
+We construct a daily panel spanning January~4, 2021 to March~17, 2026
+(1,900 trading days) from six sources:
+
+\paragraph{BTC prices.}
+Daily BTC/USDT closing prices from Binance via CryptoDataDownload.
+We use the USDT-denominated pair for liquidity and convert to USD at
+the prevailing USDT peg (effectively 1:1 over our sample).
+
+\paragraph{MSTR equity.}
+Split-adjusted daily closing prices and shares outstanding from
+Compustat.  Strategy executed a 10-for-1 stock split on August~8, 2024;
+all per-share quantities are reported on a post-split basis.
+
+\paragraph{BTC holdings.}
+Strategy's disclosed BTC holdings, resampled to daily frequency via
+forward-fill from the company's SEC filings and press releases.
+As of March~17, 2026, holdings stand at 761,068~BTC.
+
+\paragraph{BTC purchase history.}
+Individual purchase events with dates, quantities (in BTC), and
+dollar amounts, used to calibrate the jump component of holding
+dynamics.  Strategy executed approximately 49 discrete purchases over
+the sample period with a mean size of 7,044~BTC.
+
+\paragraph{Balance sheet.}
+Quarterly total debt from Compustat, forward-filled to daily.
+Total debt as of March~2026: \$8.22B.
+
+\paragraph{Preferred stock.}
+Five series of perpetual preferred stock issued between 2025 and 2026,
+with details shown in Table~\ref{tab:preferred}.
+
+\begin{table}[H]
+\centering
+\caption{Strategy preferred stock detail (as of March 2026).}
+\label{tab:preferred}
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+\textbf{Ticker} & \textbf{Div.\ Rate} & \textbf{Shares (M)} &
+\textbf{Liq.\ Value (\$B)} & \textbf{Ann.\ Div.\ (\$M)} &
+\textbf{Convertible} \\
+\midrule
+STRK  & 8.0\%  & 12.8  & 1.28  & 102   & Yes \\
+STRF  & 10.0\% & 10.5  & 1.05  & 105   & No \\
+STRC  & 9.6\%  & 50.0  & 5.00  & 479   & No \\
+STRD  & 10.0\% & 25.0  & 2.50  & 250   & No \\
+STRE  & 10.0\% &  5.0  & 0.40  &  40   & No \\
+\midrule
+\textbf{Total} & & 103.3 & 10.23 & 977 & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Risk-free rate.}
+Daily 3-month Treasury bill yields from the Federal Reserve
+(secondary market rate), used as the risk-free rate $r_f$.
+
+\paragraph{Panel construction.}
+We align all series to the common daily index and compute:
+\begin{itemize}
+  \item Asset value: $A_t = H_t \cdot S_t$;
+  \item NAV: $\mathrm{NAV}_t = (A_t - D_t - P_t^{\mathrm{liq}})^+$,
+    clipped at a floor of \$1 for log-stability;
+  \item Equity value: $E_t = P_t^{\mathrm{MSTR}} \times N_t^{\mathrm{sh}}$;
+  \item Log-premium: $\pi_t = \log(E_t / \mathrm{NAV}_t)$;
+  \item BTC per share: $B_t = H_t / N_t^{\mathrm{sh}}$.
+\end{itemize}
+
+We exclude observations where $\mathrm{NAV}_t \le 0$ or
+$\mathrm{NAV}_t < \$100$M from the calibration subset, yielding
+a clean sample for the OU estimation.
+
+%=============================================================================
+\subsection{Estimation}\label{sec:estimation}
+%=============================================================================
+
+%-----------------------------------------------------------------------------
+\subsubsection{BTC Volatility}
+%-----------------------------------------------------------------------------
+
+We estimate annualised BTC volatility from daily log-returns:
+\begin{equation}
+  \hat\sigma_S = \mathrm{std}(\Delta\log S_t) \times \sqrt{252}.
+\end{equation}
+
+%-----------------------------------------------------------------------------
+\subsubsection{OU Premium Dynamics}
+%-----------------------------------------------------------------------------
+
+We fit the log-premium $\pi_t$ to an Ornstein--Uhlenbeck process via
+AR(1) regression.  Discretising $d\pi_t = \kappa(\theta - \pi_t)\,dt
++ \sigma_\pi\,dW_t^\pi$ at daily frequency ($\Delta t = 1/252$):
+\begin{equation}
+  \pi_{t+\Delta t} = a + b\,\pi_t + \varepsilon_t,
+  \qquad \varepsilon_t \sim \mathcal{N}(0, \sigma_\varepsilon^2),
+\end{equation}
+where $b = e^{-\kappa\Delta t}$, $a = \theta(1-b)$, and
+$\sigma_\varepsilon^2 = \sigma_\pi^2(1 - e^{-2\kappa\Delta t})/(2\kappa)$.
+We recover:
+\begin{equation}
+  \hat\kappa = -\frac{\log\hat{b}}{\Delta t},
+  \quad
+  \hat\theta = \frac{\hat{a}}{1-\hat{b}},
+  \quad
+  \hat\sigma_\pi = \hat\sigma_\varepsilon
+    \sqrt{\frac{2\hat\kappa}{1 - e^{-2\hat\kappa\Delta t}}}.
+\end{equation}
+
+%-----------------------------------------------------------------------------
+\subsubsection{Correlation Structure}
+%-----------------------------------------------------------------------------
+
+The correlation $\hat\rho$ between BTC log-returns and premium innovations
+is estimated from the OLS residuals.  The premium sensitivity
+$\hat\gamma_{\pi S}$ is the regression coefficient of $\Delta\pi_t$ on
+$\Delta\log S_t$.
+
+%-----------------------------------------------------------------------------
+\subsubsection{Holdings Dynamics}
+%-----------------------------------------------------------------------------
+
+The holding process $dH_t = \alpha\pi_t^+\,dt + dH_t^{\mathrm{jump}}$
+is calibrated by:
+\begin{enumerate}
+  \item Estimating the continuous component $\hat\alpha$ from the regression
+    of non-jump holding changes on $\pi_t^+$.
+  \item Identifying discrete purchase events (jumps) and estimating
+    arrival rate $\hat\lambda_M$ (events per year) and mean jump size
+    $\mathbb{E}[\Delta H]$ from the purchase history.
+\end{enumerate}
+
+%=============================================================================
+\subsection{Capital Structure}\label{sec:capstruct_empirical}
+%=============================================================================
+
+Strategy's capital structure as of March~2026 comprises four layers
+in strict priority:
+
+\begin{enumerate}
+  \item \textbf{Senior debt:} \$8.22B in convertible senior notes,
+    weighted average coupon 0.42\%.  The 0\% notes due 2029 (\$3B,
+    conversion at \$672.40) and 2030 (\$2B, conversion at \$433.43)
+    dominate.  Notes with conversion prices below \$250 are deep
+    in-the-money and model as quasi-equity.
+  \item \textbf{Non-convertible preferred:} STRF, STRC, STRD, STRE
+    with combined liquidation value of \$8.95B and annual dividends
+    of \$874M.  These are perpetual fixed obligations.
+  \item \textbf{Convertible preferred:} STRK with \$1.28B liquidation
+    value, 8\% dividend, and conversion at \$1,000/share (currently
+    deep out-of-the-money at MSTR $\approx$\$150).
+  \item \textbf{Common equity:} 320.4M shares outstanding with
+    residual claim on $\mathrm{NAV}_t = (A_t - D_t - P_t^{\mathrm{liq}})^+$.
+\end{enumerate}
+
+The total liquidation value of preferred stock is \$10.23B, creating
+a preferred-plus-debt obligation of \$18.45B.  The annual preferred
+dividend of \$977M represents the dominant fixed-cost burden and is
+the binding constraint in the leverage spiral analysis.
+
+Remaining issuance capacity: \$8.1B common equity ATM, \$20.3B STRK,
+\$3.6B STRC, \$4.2B STRD, \$2.1B STRF.  This capacity provides
+optionality for future BTC acquisition across premium regimes.

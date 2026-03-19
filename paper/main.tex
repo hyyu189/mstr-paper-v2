@@ -1,0 +1,74 @@
+\documentclass[12pt]{article}
+
+% -------------------------------------------------------------------
+% Packages
+% -------------------------------------------------------------------
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{hyperref}
+\usepackage[authoryear,round]{natbib}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{setspace}
+\usepackage{enumitem}
+\usepackage{float}
+
+\onehalfspacing
+
+% -------------------------------------------------------------------
+% Theorem environments
+% -------------------------------------------------------------------
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{assumption}[theorem]{Assumption}
+\newtheorem{remark}[theorem]{Remark}
+
+% -------------------------------------------------------------------
+% Hyperref setup
+% -------------------------------------------------------------------
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!70!black,
+  citecolor=blue!70!black,
+  urlcolor=blue!70!black
+}
+
+% -------------------------------------------------------------------
+% Graphics path
+% -------------------------------------------------------------------
+\graphicspath{{../results/figures/}}
+
+% -------------------------------------------------------------------
+% Title
+% -------------------------------------------------------------------
+\title{A Theory of Endogenous Premium in Bitcoin Treasury Vehicles:\\
+Accumulation Options, Reflexive Equilibria, and Capital Stack Dynamics}
+\author{Haiyang Yu\thanks{UCLA Anderson School of Management.
+  Email: \texttt{haiyang.yu@anderson.ucla.edu}.}}
+\date{March 2026}
+
+% ===================================================================
+\begin{document}
+% ===================================================================
+
+\maketitle
+
+\input{sections/abstract}
+
+\newpage
+\input{sections/introduction}
+\input{sections/literature}
+\input{sections/theory}
+\input{sections/empirical}
+\input{sections/results}
+\input{sections/discussion}
+\input{sections/conclusion}
+
+\newpage
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}

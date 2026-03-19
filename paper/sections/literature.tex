@@ -1,0 +1,78 @@
+%!TEX root = ../main.tex
+
+\section{Related Literature}\label{sec:literature}
+
+This paper connects to several strands of the finance literature.
+
+\paragraph{Structural credit models.}
+The structural approach to corporate liabilities originates with
+\citet{merton1974pricing}, who models equity as a call option on the firm's
+assets.  \citet{leland1994corporate} extends this framework to incorporate
+endogenous default boundaries and optimal capital structure, while
+\citet{leland1996optimal} adds debt maturity choice.  Our model shares the
+structural perspective---MSTR equity is a levered claim on BTC---but
+introduces an accumulation option absent from classical models, where asset
+dynamics are exogenous.
+
+\paragraph{Closed-end fund premia and discounts.}
+The persistent deviation of closed-end fund (CEF) prices from NAV is a
+well-documented anomaly.  \citet{lee1991investor} attribute discounts to
+investor sentiment; \citet{pontiff1995closed} emphasises managerial expenses
+and dividend policy; \citet{cherkes2009closed} model premia as reflecting
+liquidity benefits.  The BTC treasury vehicle resembles a CEF in that equity
+trades at a premium to the underlying asset value, but differs fundamentally:
+the premium is sustained by an \emph{active} accumulation strategy rather
+than passive holding, and the manager can issue new shares to grow the asset
+base---a feature absent from standard CEFs.
+
+\paragraph{Convertible securities and hybrid capital.}
+The valuation of convertible bonds follows \citet{tsiveriotis1998valuing},
+who decompose the instrument into equity and debt components.
+\citet{brennan1977convertible} and \citet{ingersoll1977contingent} develop
+structural models for convertible pricing.  Strategy's capital stack---common
+equity, convertible notes, convertible preferred (STRK), and
+non-convertible preferred (STRF, STRC, STRD, STRE)---creates a layered
+priority structure that we model explicitly.  The interaction between
+preferred dividends and common equity accumulation dynamics is novel.
+
+\paragraph{Reflexivity and feedback in financial markets.}
+\citet{soros1987alchemy} introduces the concept of reflexivity---the
+feedback between market prices and the fundamentals they are supposed to
+reflect.  In formal models, \citet{brunnermeier2014macroeconomic} and
+\citet{he2013intermediary} study feedback loops between asset prices and
+financial intermediary balance sheets.  \citet{brunnermeier2009market}
+formalise margin spirals where declining collateral values trigger forced
+sales.  Our reflexive flywheel mechanism is distinct: it operates through
+\emph{voluntary} equity issuance at a premium rather than forced
+deleveraging, though the death spiral shares features with margin spirals.
+
+\paragraph{Cryptocurrency finance.}
+The theoretical literature on cryptocurrency markets is growing rapidly.
+\citet{biais2023equilibrium} model Bitcoin as a coordination game with
+multiple equilibria in adoption.  \citet{cong2021tokenomics} develop a
+dynamic model of token-based platforms.  \citet{foley2019sex} and
+\citet{makarov2020trading} study Bitcoin market microstructure and
+arbitrage.  On the empirical side, \citet{liu2021risks} document
+cryptocurrency risk factors, and \citet{griffin2020bitcoin} examine price
+manipulation.  Our contribution is orthogonal: we model the \emph{corporate
+vehicle} that holds Bitcoin rather than the cryptocurrency itself, though
+the market impact analysis (Section~\ref{sec:market_impact_theory}) connects
+the two through the price feedback channel.
+
+\paragraph{Bitcoin ETFs and passive vehicles.}
+The approval of spot Bitcoin ETFs in the United States in January~2024
+created a benchmark for pure delta-one BTC exposure.
+\citet{alexander2024bitcoin} study ETF premium dynamics and the
+creation/redemption mechanism.  We provide a formal comparison between the
+ETF (zero accumulation option) and the treasury vehicle (positive
+accumulation option), deriving conditions under which each dominates
+(Section~\ref{sec:etf_comparison}).
+
+\paragraph{Gap in the literature.}
+No existing work provides a structural theory for the NAV premium of a BTC
+treasury vehicle.  The CEF literature treats premia as anomalies driven by
+sentiment or frictions; the structural credit literature assumes exogenous
+asset dynamics; and the crypto-finance literature focuses on token design
+and market microstructure.  Our paper bridges these literatures by showing
+that the premium is the equilibrium price of an accumulation option whose
+value depends endogenously on the premium itself.
