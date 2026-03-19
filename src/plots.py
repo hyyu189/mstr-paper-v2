@@ -135,6 +135,71 @@ def plot_ifrd_histogram(
     plt.close(fig)
 
 
+def plot_fair_premium_vs_actual(
+    panel: pd.DataFrame,
+    pi_star: pd.Series,
+    outdir: Path,
+) -> None:
+    """Plot actual premium and fair premium time series."""
+    _ensure_dir(outdir)
+
+    fig, ax = plt.subplots(figsize=(9, 4))
+    ax.plot(panel.index, panel["premium"], label=r"Actual $\pi_t$", linewidth=2.0)
+    ax.plot(pi_star.index, pi_star, label=r"Fair $\pi^*_t$", linewidth=2.0, linestyle="--")
+    ax.axhline(0.0, color="black", linestyle=":", linewidth=0.8, alpha=0.6)
+    ax.fill_between(
+        panel.index,
+        panel["premium"],
+        pi_star,
+        alpha=0.15,
+        color="grey",
+        label="Mispricing gap",
+    )
+    ax.set_title(r"Actual vs Fair Premium: $\pi_t$ and $\pi^*_t$")
+    ax.set_ylabel("log premium")
+    ax.legend(loc="upper left", fontsize=9)
+    ax.grid(True, alpha=0.3)
+    fig.autofmt_xdate()
+    fig.tight_layout()
+    fig.savefig(outdir / "fair_premium_vs_actual.png", dpi=200)
+    plt.close(fig)
+
+
+def plot_mispricing_timeseries(
+    mispricing_df: pd.DataFrame,
+    outdir: Path,
+) -> None:
+    r"""Plot mispricing :math:`\Delta_t` with z-score bands."""
+    _ensure_dir(outdir)
+
+    fig, axes = plt.subplots(2, 1, figsize=(9, 6), sharex=True)
+
+    # Top: raw mispricing
+    ax = axes[0]
+    ax.plot(mispricing_df.index, mispricing_df["delta"], linewidth=1.5, color=sns.color_palette()[0])
+    ax.axhline(0.0, color="black", linestyle="--", linewidth=0.8, alpha=0.7)
+    ax.set_title(r"Mispricing $\Delta_t = \pi_t - \pi^*_t$")
+    ax.set_ylabel(r"$\Delta_t$")
+    ax.grid(True, alpha=0.3)
+
+    # Bottom: z-score with bands
+    ax = axes[1]
+    z = mispricing_df["z_score"]
+    ax.plot(mispricing_df.index, z, linewidth=1.5, color=sns.color_palette()[3])
+    ax.axhline(0.0, color="black", linestyle="--", linewidth=0.8, alpha=0.7)
+    for band in [-2, -1, 1, 2]:
+        ax.axhline(band, color="grey", linestyle=":", linewidth=0.7, alpha=0.5)
+    ax.fill_between(mispricing_df.index, -2, 2, alpha=0.06, color="blue")
+    ax.set_title(r"Mispricing z-score $z_t$")
+    ax.set_ylabel("z-score")
+    ax.grid(True, alpha=0.3)
+
+    fig.autofmt_xdate()
+    fig.tight_layout()
+    fig.savefig(outdir / "mispricing_timeseries.png", dpi=200)
+    plt.close(fig)
+
+
 def plot_capital_structure(
     preferred_detail: pd.DataFrame,
     debt_total: float,
