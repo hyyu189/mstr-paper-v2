@@ -1,0 +1,316 @@
+% theory_market_impact.tex
+% BTC price impact, reflexivity amplification, and systemic risk
+
+\section{BTC Price Impact and Reflexivity}
+\label{sec:market_impact}
+
+Strategy's BTC acquisitions are large relative to daily trading volume.
+This section models the price impact of purchases, derives a reflexivity
+amplification factor, and analyzes systemic risk from corporate BTC
+treasury adoption.
+
+\subsection{Price Impact Model}
+
+We augment the BTC price dynamics (Section~2.2) with a permanent
+price impact term:
+\begin{equation}
+  \frac{dS_t}{S_t} = \mu_S\,dt + \sigma_S\,dW_t^{S,\mathbb{P}}
+  + \eta\,\frac{dH_t}{V_t},
+  \label{eq:price_impact}
+\end{equation}
+where:
+\begin{itemize}
+  \item $V_t$ is the daily BTC trading volume (in BTC),
+  \item $\eta > 0$ is the Kyle lambda---the permanent price impact
+    per unit of order flow normalized by volume,
+  \item $dH_t / V_t$ is Strategy's purchase flow as a fraction
+    of market volume.
+\end{itemize}
+
+\begin{remark}
+This follows the Kyle (1985) linear price impact framework.
+The normalization by $V_t$ makes $\eta$ dimensionless and
+captures the intuition that the same dollar purchase has less
+impact in a liquid market.
+For BTC, empirical estimates suggest $\eta \in [0.1, 0.5]$
+depending on the execution horizon and venue.
+\end{remark}
+
+Substituting the holding dynamics $dH_t = \alpha\pi_t^+\,dt + dH_t^{\mathrm{jump}}$:
+\begin{equation}
+  \frac{dS_t}{S_t} = \left(\mu_S + \eta\,\frac{\alpha\pi_t^+}{V_t}\right)dt
+  + \sigma_S\,dW_t^{S,\mathbb{P}}
+  + \eta\,\frac{dH_t^{\mathrm{jump}}}{V_t}.
+  \label{eq:price_impact_expanded}
+\end{equation}
+
+The drift of BTC price is now \emph{endogenously increased} when
+the premium is positive, creating a feedback channel.
+
+\subsection{Reflexivity and the Amplification Factor}
+
+The feedback loop operates as follows:
+\begin{enumerate}
+  \item Strategy purchases BTC ($dH_t > 0$).
+  \item BTC price rises due to price impact ($dS_t > 0$).
+  \item NAV increases: $\mathrm{NAV}_t = H_t S_t - D_t$.
+  \item If $\pi_t$ is sticky or increases, equity value $E_t = e^{\pi_t}\mathrm{NAV}_t$ rises.
+  \item Higher equity value enables more ATM issuance or convertible placement.
+  \item Proceeds fund additional BTC purchases. Return to step 1.
+\end{enumerate}
+
+\begin{definition}[Feedback Gain]
+\label{def:feedback_gain}
+The \emph{instantaneous feedback gain} is
+\begin{equation}
+  G_t = \eta\,\frac{\alpha}{V_t}\,
+  \frac{\partial\,\text{Issuance Capacity}}{\partial S_t}\,
+  \frac{1}{S_t},
+  \label{eq:feedback_gain}
+\end{equation}
+measuring the fraction of a BTC price increase that is recycled
+into additional purchases through the financing flywheel.
+\end{definition}
+
+To derive $G_t$ explicitly, note that ATM issuance capacity is
+proportional to $E_t = e^{\pi_t}(H_t S_t - D_t)$, so:
+\begin{align}
+  \frac{\partial E_t}{\partial S_t}
+  &= e^{\pi_t} H_t + e^{\pi_t}(H_t S_t - D_t)\frac{\partial\pi_t}{\partial S_t}
+  \notag\\
+  &= E_t\left(\frac{H_t}{H_t S_t - D_t}
+    + \frac{\partial\pi_t}{\partial\log S_t}\right)
+  = E_t\left(\mathrm{ILE}_t + \gamma_{\pi S}\right)\frac{1}{S_t}
+  \notag\\
+  &= E_t \cdot \beta_{\mathrm{TOT}}(t) \cdot \frac{1}{S_t}.
+  \label{eq:equity_sensitivity}
+\end{align}
+
+If a fraction $\phi_t$ of the equity value increase is deployed
+to purchase BTC (the ``reinvestment rate''), then:
+\begin{equation}
+  G_t = \eta\,\frac{\phi_t\,\beta_{\mathrm{TOT}}(t)\,E_t}{V_t\,S_t^2}.
+  \label{eq:gain_explicit}
+\end{equation}
+
+\begin{proposition}[Reflexivity Amplification Factor]
+\label{prop:reflexivity}
+The steady-state amplification factor for the BTC price response
+to an exogenous demand shock is
+\begin{equation}
+  R_t = \frac{1}{1 - G_t},
+  \label{eq:amplification}
+\end{equation}
+provided $G_t < 1$ (stability condition).
+An exogenous BTC demand shock of $\Delta S^{\mathrm{exog}}$
+produces an equilibrium price response of
+$\Delta S^{\mathrm{eq}} = R_t \cdot \Delta S^{\mathrm{exog}}$.
+\end{proposition}
+
+\begin{proof}
+Consider a unit exogenous price increase $\delta$.
+Through the feedback loop, this generates additional BTC purchases
+of $G_t \delta / \eta$ in volume-normalized terms, producing a
+second-round price impact of $G_t \delta$.
+Iterating, the total impact is
+$\delta(1 + G_t + G_t^2 + \cdots) = \delta/(1 - G_t)$
+when $|G_t| < 1$.
+\end{proof}
+
+\begin{proposition}[Instability Condition]
+\label{prop:instability}
+The reflexive feedback loop becomes unstable ($R_t \to \infty$) when
+\begin{equation}
+  G_t \ge 1
+  \quad\Longleftrightarrow\quad
+  \eta\,\phi_t\,\beta_{\mathrm{TOT}}(t)\,E_t \ge V_t\,S_t^2.
+  \label{eq:instability}
+\end{equation}
+This is more likely when:
+\begin{enumerate}
+  \item Price impact $\eta$ is high (illiquid market).
+  \item Reinvestment rate $\phi_t$ is high (aggressive issuance).
+  \item Total equity elasticity $\beta_{\mathrm{TOT}}(t)$ is high
+    (high leverage or pro-cyclical premium).
+  \item Equity capitalization $E_t$ is large relative to BTC market
+    depth $V_t S_t$.
+\end{enumerate}
+\end{proposition}
+
+\begin{remark}[Current Calibration]
+With $E_t \approx \$16B$ (at $\pi_0 = 0.242$, NAV $\approx \$48B$,
+$E_t = e^{0.242}\times\$48B\approx\$61B$---but the negative $\gamma_{\pi S} = -3.60$
+yields $\beta_{\mathrm{TOT}} = -2.11$, which is negative),
+the feedback gain is in fact \emph{negative} at current calibration.
+This reflects the empirical finding that the premium \emph{compresses}
+when BTC rises ($\gamma_{\pi S} < 0$), acting as a natural dampener.
+The reflexive amplification is thus $R_t < 1$: price impact is
+\emph{attenuated} rather than amplified under current market conditions.
+
+Instability would require $\gamma_{\pi S}$ to turn positive
+(premium expanding with BTC price), which could occur during
+speculative episodes. The November--December 2024 rally, where
+$\pi_t$ exceeded 2.0 coincident with BTC's rise to \$100K+,
+may represent such an episode.
+\end{remark}
+
+\subsection{Discrete Financing Events and Jump Impact}
+
+Large discrete purchases have concentrated price impact.
+At event time $\tau_k$, Strategy purchases $\Delta H_{\tau_k}$ BTC,
+producing a price jump:
+\begin{equation}
+  \frac{\Delta S_{\tau_k}}{S_{\tau_k^-}}
+  = \eta\,\frac{\Delta H_{\tau_k}}{V_{\tau_k}}.
+  \label{eq:jump_impact}
+\end{equation}
+
+\begin{theorem}[Expected Price Impact of Financing Program]
+\label{thm:expected_impact}
+The expected cumulative price impact of Strategy's BTC acquisition
+program over horizon $[0,T]$ is
+\begin{equation}
+  \mathbb{E}^{\mathbb{P}}\!\left[
+    \int_0^T \eta\,\frac{dH_u}{V_u}
+  \right]
+  = \eta\left(
+    \frac{\alpha\,\mathbb{E}[\pi_t^+]}{\bar{V}}\,T
+    + \lambda_M\,\frac{\mathbb{E}[\Delta H]}{\bar{V}}\,T
+  \right),
+  \label{eq:cumulative_impact}
+\end{equation}
+where $\bar{V}$ is the average daily volume.
+With calibrated parameters ($\alpha = 0$,
+$\lambda_M = 19.05$ events/year,
+$\mathbb{E}[\Delta H] = 7{,}044$ BTC,
+$\bar{V} \approx 25{,}000$ BTC/day on major exchanges), this gives
+an annual price contribution of approximately
+$\eta \times 19.05 \times 7{,}044 / 25{,}000 \approx 5.37\eta$,
+or $0.54$--$2.68\%$ for $\eta \in [0.1, 0.5]$.
+\end{theorem}
+
+\subsection{Systemic Risk from Corporate BTC Adoption}
+\label{subsec:systemic}
+
+Strategy holds approximately 761{,}068 BTC out of roughly 19.8M
+circulating supply (3.84\%). If other corporations adopt similar
+treasury strategies, concentration risk increases.
+
+\begin{definition}[Aggregate Corporate Holdings]
+Let $\mathcal{F} = \{1, \ldots, F\}$ be the set of firms holding BTC
+as treasury assets. Define aggregate corporate holdings
+\begin{equation}
+  H_t^{\mathrm{agg}} = \sum_{f \in \mathcal{F}} H_t^{(f)},
+  \qquad
+  \omega_t = \frac{H_t^{\mathrm{agg}}}{\bar{H}^{\mathrm{supply}}},
+  \label{eq:aggregate_holdings}
+\end{equation}
+where $\bar{H}^{\mathrm{supply}}$ is the effective circulating supply
+and $\omega_t$ is the corporate concentration ratio.
+\end{definition}
+
+\begin{proposition}[Fire-Sale Externality]
+\label{prop:fire_sale}
+Consider $F$ firms each holding $H^{(f)}$ BTC with leverage
+$\mathrm{ILE}^{(f)}$. If firm $f$ faces a covenant breach or
+liquidity crisis when $S_t < S^{(f)}_{\mathrm{distress}}$, it must
+liquidate $\Delta H^{(f)}_{\mathrm{sell}} \le H^{(f)}$ BTC.
+The aggregate fire-sale impact on BTC price is
+\begin{equation}
+  \frac{\Delta S^{\mathrm{fire}}}{S_t}
+  = -\eta_{\mathrm{sell}}\,
+  \frac{\sum_{f: S_t < S^{(f)}_{\mathrm{distress}}} \Delta H^{(f)}_{\mathrm{sell}}}{V_t},
+  \label{eq:fire_sale}
+\end{equation}
+where $\eta_{\mathrm{sell}}$ is the sell-side price impact (potentially
+larger than $\eta$ due to adverse selection in distressed sales).
+\end{proposition}
+
+This connects to the fire-sale literature of \citet{shleifer1997limits}
+and \citet{shleifer2011fire}. The key distinction is that
+BTC is a single homogeneous asset with a unified global order book,
+so fire sales by any holder affect all holders simultaneously---there
+is no asset-class diversification to absorb the shock.
+
+\begin{theorem}[Contagion Cascade Condition]
+\label{thm:contagion}
+A contagion cascade occurs when the fire sale by one firm pushes
+$S_t$ below the distress threshold of another firm. Formally,
+order the firms by distress threshold:
+$S^{(1)}_{\mathrm{distress}} > S^{(2)}_{\mathrm{distress}} > \cdots$.
+A cascade starting from firm $1$ propagates to firm $j$ if
+\begin{equation}
+  S_t - \eta_{\mathrm{sell}}\,S_t\,
+  \frac{\sum_{i=1}^{j-1} \Delta H^{(i)}_{\mathrm{sell}}}{V_t}
+  < S^{(j)}_{\mathrm{distress}}.
+  \label{eq:contagion}
+\end{equation}
+The cascade is self-limiting if and only if there exists $j^* < F$
+such that the post-liquidation price exceeds all remaining thresholds:
+\begin{equation}
+  S_t\left(1 - \eta_{\mathrm{sell}}\,
+  \frac{\sum_{i=1}^{j^*} \Delta H^{(i)}_{\mathrm{sell}}}{V_t}\right)
+  > S^{(j^*+1)}_{\mathrm{distress}}.
+  \label{eq:cascade_limit}
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+The proof follows by induction on the ordered firm sequence.
+If the post-liquidation price after firm $j-1$ sells is below
+$S^{(j)}_{\mathrm{distress}}$, firm $j$ is forced to sell,
+further depressing the price by
+$\eta_{\mathrm{sell}}\,\Delta H^{(j)}_{\mathrm{sell}} / V_t$.
+The cascade terminates at $j^*$ if the cumulative price impact
+is insufficient to breach the next threshold.
+\end{proof}
+
+\begin{remark}[Current Systemic Assessment]
+Strategy is currently the dominant corporate BTC holder.
+The nearest comparables (Marathon Digital, Riot Platforms, etc.)
+hold 1--2 orders of magnitude less BTC.
+Under current concentration, the fire-sale externality is
+primarily a single-firm risk rather than a systemic cascade.
+
+However, Strategy's success has catalyzed adoption: at least 70+
+public companies now hold BTC on balance sheet.
+If aggregate corporate holdings reach 10--15\% of circulating supply
+(currently $\sim$5\% including miners and ETFs), the contagion cascade
+mechanism becomes material.
+
+Strategy's own distress threshold, with $D_t = \$8.22$B and
+$H_t = 761{,}068$ BTC, occurs at
+$S_{\mathrm{distress}} = D_t / H_t \approx \$10{,}800$.
+Including preferred liquidation claims (\$10.23B),
+the full-stack distress threshold is
+$(D_t + \text{Pref}_t) / H_t \approx \$24{,}200$.
+Both are well below the current price of \$73{,}909, implying
+substantial buffer against forced liquidation.
+\end{remark}
+
+\subsection{Volume-Adjusted Impact Over Time}
+
+As BTC market depth grows, the price impact of a fixed-size purchase
+diminishes. We model volume growth as:
+\begin{equation}
+  V_t = V_0\,e^{g_V t},
+  \label{eq:volume_growth}
+\end{equation}
+where $g_V$ is the annual growth rate of BTC trading volume.
+The time-varying amplification factor becomes:
+\begin{equation}
+  R_t = \frac{1}{1 - G_0\,e^{(g_E - 2g_S - g_V)t}},
+  \label{eq:time_varying_R}
+\end{equation}
+where $g_E$ is the growth rate of equity value and $g_S$ the growth
+rate of BTC price. The feedback loop naturally weakens over time
+if BTC volume and price grow faster than Strategy's equity
+capitalization---a plausible scenario as the BTC market matures.
+
+\begin{corollary}[Asymptotic Stability]
+\label{cor:asymptotic}
+If $2g_S + g_V > g_E$, then $G_t \to 0$ and $R_t \to 1$ as
+$t \to \infty$: the reflexive feedback loop asymptotically vanishes.
+Strategy's price impact becomes negligible as the BTC market
+grows relative to any single corporate buyer.
+\end{corollary}

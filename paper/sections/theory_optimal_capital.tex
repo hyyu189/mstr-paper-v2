@@ -1,0 +1,343 @@
+% theory_optimal_capital.tex
+% Optimal financing channel selection, WACBA, and endogenous leverage dynamics
+
+\section{Optimal Capital Structure and Financing Channel Selection}
+\label{sec:optimal_capital}
+
+Strategy employs five distinct financing channels to acquire BTC:
+at-the-market (ATM) common equity issuance, convertible senior notes,
+and three classes of perpetual preferred stock---convertible (STRK, 8\%),
+non-convertible fixed-rate (STRF 10\%, STRD 10\%, STRE 10\% EUR-denominated),
+and variable-rate (STRC, currently 11.5\%).
+Each channel carries a different effective cost of BTC acquisition
+that depends on the log-premium $\pi_t$ and the BTC spot price $S_t$.
+This section derives the cost structure for each channel, establishes
+the optimal financing rule, and introduces the Weighted Average Cost
+of BTC Acquisition (WACBA).
+
+\subsection{Cost of Each Financing Channel}
+
+We define the \emph{effective cost of BTC acquisition} for channel $c$
+as the rate $k_c(\pi_t, S_t)$ such that an incremental dollar raised
+through channel $c$ adds BTC at an all-in cost of $k_c$ per unit,
+expressed as an annualized percentage drag on BTC-per-share accretion.
+
+\subsubsection{ATM Common Equity}
+
+When the firm issues $\Delta N$ new shares at market price $P_t$,
+it raises $P_t \Delta N$ dollars and purchases
+$\Delta H = P_t \Delta N / S_t$ BTC.
+The net effect on BTC per share is:
+\begin{equation}
+  \Delta B = \frac{H_t + \Delta H}{N_t^{\mathrm{sh}} + \Delta N} - B_t
+  = \frac{B_t(e^{\pi_t} \cdot \text{ILE}_t^{-1} - 1)}{1 + \Delta N / N_t^{\mathrm{sh}}}\cdot\frac{\Delta N}{N_t^{\mathrm{sh}}},
+  \label{eq:atm_dilution}
+\end{equation}
+where the simplification uses
+$P_t / S_t = e^{\pi_t}(H_t S_t - D_t) / (N_t^{\mathrm{sh}} S_t)
+= e^{\pi_t} B_t (1 - D_t / (H_t S_t))$.
+
+\begin{proposition}[ATM Accretion Threshold]
+\label{prop:atm_threshold}
+ATM equity issuance is BTC-per-share accretive if and only if
+\begin{equation}
+  \pi_t > \log\!\bigl(\mathrm{ILE}_t\bigr) = \log\!\left(\frac{H_t S_t}{H_t S_t - D_t}\right).
+  \label{eq:atm_accretive}
+\end{equation}
+When accretive, the marginal cost of BTC acquisition via ATM is
+\begin{equation}
+  k_{\mathrm{ATM}}(\pi_t) = -\mu_{H/N}^{\mathrm{marginal}}
+  = -\frac{e^{\pi_t}/\mathrm{ILE}_t - 1}{e^{\pi_t}/\mathrm{ILE}_t} < 0,
+  \label{eq:atm_cost}
+\end{equation}
+i.e., negative cost (value-creating). When $\pi_t \le \log(\mathrm{ILE}_t)$,
+ATM issuance is dilutive and the firm optimally avoids this channel.
+\end{proposition}
+
+\begin{proof}
+Write $P_t = e^{\pi_t}(A_t - D_t)/N_t^{\mathrm{sh}}$ and
+$B_t = H_t / N_t^{\mathrm{sh}}$.
+Each new share issued at price $P_t$ purchases $P_t / S_t$ BTC.
+The issuance is accretive iff the BTC purchased per new share exceeds
+the existing BTC per share:
+\[
+  \frac{P_t}{S_t} > B_t
+  \iff
+  \frac{e^{\pi_t}(H_t S_t - D_t)}{N_t^{\mathrm{sh}} S_t} > \frac{H_t}{N_t^{\mathrm{sh}}}
+  \iff
+  e^{\pi_t} > \frac{H_t S_t}{H_t S_t - D_t} = \mathrm{ILE}_t.
+\]
+The cost expression follows by computing the fractional BTC-per-share
+gain per dollar deployed.
+\end{proof}
+
+\begin{remark}
+With current parameters (Table~\ref{tab:calibrated}), $\mathrm{ILE}_t = 1.488$
+so the accretion threshold is $\pi_t > \log(1.488) \approx 0.397$.
+The current premium $\pi_0 = 0.242$ is \emph{below} this threshold,
+indicating that ATM equity issuance would currently be mildly dilutive,
+consistent with the observed shift toward preferred stock issuance.
+\end{remark}
+
+\subsubsection{Convertible Senior Notes}
+
+A convertible note with coupon $c_j$, conversion price $K_j$, and maturity $T_j$
+has effective cost comprising two components:
+\begin{enumerate}
+  \item \textbf{Coupon cost:} The ongoing interest payment $c_j$ per annum
+    on principal $D_j$.
+  \item \textbf{Expected dilution at conversion:} If $P_{T_j} > K_j$,
+    the note converts into $D_j / K_j$ shares, diluting existing shareholders.
+\end{enumerate}
+
+The all-in annualized cost is:
+\begin{equation}
+  k_{\mathrm{conv},j} = c_j + \frac{1}{T_j - t}\,
+  \mathbb{E}^{\mathbb{P}}\!\left[
+    \left(\frac{D_j}{K_j}\cdot\frac{B_{T_j}}{1 + D_j/(K_j N_{T_j}^{\mathrm{sh}})}
+    - \frac{D_j}{S_{T_j}}\right)^{\!+}
+    \cdot \frac{S_{T_j}}{D_j}
+  \right],
+  \label{eq:conv_cost}
+\end{equation}
+where the expectation captures the path-dependent dilution loss relative
+to outright BTC purchase.
+
+\begin{remark}
+Strategy's convertible notes carry exceptionally low coupons
+(weighted average 0.42\%), making them the cheapest debt channel.
+The 0\% notes due 2029 (\$3B, conversion at \$672.40) and 2030
+(\$2B, conversion at \$433.43) dominate the outstanding convertible portfolio.
+At current MSTR price levels, notes with conversion prices below \$250
+are deep in-the-money and should be modeled as quasi-equity.
+\end{remark}
+
+\subsubsection{Non-Convertible Perpetual Preferred Stock}
+
+For non-convertible preferred (STRF, STRD, STRE), the cost is
+straightforward:
+\begin{equation}
+  k_{\mathrm{pref},j} = \frac{d_j \cdot L_j}{\text{Proceeds}_j},
+  \label{eq:pref_cost}
+\end{equation}
+where $d_j$ is the dividend rate, $L_j$ the liquidation preference,
+and $\text{Proceeds}_j$ the net issuance proceeds per share.
+
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+Ticker & Div.\ Rate & IPO Price & Stated Amount & Effective Cost \\
+\midrule
+STRF & 10.0\% & \$85.00 & \$100.00 & 11.76\% \\
+STRD & 10.0\% & \$85.00 & \$100.00 & 11.76\% \\
+STRE & 10.0\% & \EUR{80.00} & \EUR{100.00} & 12.50\% \\
+STRC & 9.6\%$^*$ & \$90.00 & \$100.00 & 10.67\%--12.78\%$^\dagger$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+{\small $^*$Initial rate; current rate 11.5\%.
+$^\dagger$Range reflects variable rate adjustment.}
+
+\medskip
+These instruments carry no dilution risk to common shareholders
+but impose a perpetual fixed obligation.
+The annual dividend burden is approximately \$976.6M.
+
+\subsubsection{Convertible Perpetual Preferred (STRK)}
+
+STRK (8\% cumulative, convertible at 0.1 MSTR shares per STRK share,
+effective conversion price \$1{,}000) combines preferred dividend cost
+with conversion optionality:
+\begin{equation}
+  k_{\mathrm{STRK}} = d_{\mathrm{STRK}} + \frac{1}{T_{\mathrm{eff}}}
+  \mathbb{E}^{\mathbb{P}}\!\left[
+    \mathbf{1}_{\{P_T > K_{\mathrm{STRK}}\}}
+    \cdot \text{dilution cost}
+  \right],
+  \label{eq:strk_cost}
+\end{equation}
+where $d_{\mathrm{STRK}} = 8\%/\$80 = 10\%$ effective dividend yield
+and $K_{\mathrm{STRK}} = \$1{,}000$ per MSTR share.
+The conversion component is currently deep out-of-the-money,
+making STRK's effective cost approximately 10\%, comparable to
+non-convertible preferred but with a \$21B ATM capacity that
+provides substantial future issuance optionality.
+
+\subsection{Optimal Financing Rule}
+
+\begin{proposition}[Optimal Channel Selection]
+\label{prop:optimal_channel}
+Let $\pi^*_{\mathrm{ATM}} = \log(\mathrm{ILE}_t)$ denote the ATM accretion
+threshold and $\pi^*_{\mathrm{conv}}$ the premium level at which
+convertible issuance becomes cheaper than preferred.
+The cost-minimizing financing rule is:
+\begin{equation}
+  c^*(\pi_t) =
+  \begin{cases}
+    \text{ATM equity} & \text{if } \pi_t > \pi^*_{\mathrm{ATM}},
+      \quad k_{\mathrm{ATM}} < 0, \\[4pt]
+    \text{Convertible bonds} & \text{if } \pi^*_{\mathrm{conv}} < \pi_t
+      \le \pi^*_{\mathrm{ATM}},
+      \quad k_{\mathrm{conv}} \approx 0.4\text{--}2.3\%, \\[4pt]
+    \text{Preferred stock} & \text{if } \pi_t \le \pi^*_{\mathrm{conv}},
+      \quad k_{\mathrm{pref}} \approx 10\text{--}12.5\%.
+  \end{cases}
+  \label{eq:optimal_channel}
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+The ordering follows directly from the cost functions derived above.
+When $\pi_t > \pi^*_{\mathrm{ATM}}$, ATM issuance has negative cost
+(accretive) and strictly dominates all other channels.
+Below this threshold, convertible bonds offer the lowest positive cost
+due to their near-zero coupons, provided the premium is sufficient
+to attract investor demand for equity upside.
+When the premium is low or negative, only the unconditional claim
+of preferred dividends can attract capital, at the highest cost.
+
+The thresholds are:
+\begin{align}
+  \pi^*_{\mathrm{ATM}} &= \log(\mathrm{ILE}_t)
+  = \log\!\left(\frac{A_t}{A_t - D_t}\right), \\
+  \pi^*_{\mathrm{conv}} &\approx \log(\mathrm{ILE}_t)
+  - \frac{k_{\mathrm{pref}} - \bar{c}_{\mathrm{conv}}}
+         {\gamma_{\mathrm{demand}}},
+\end{align}
+where $\gamma_{\mathrm{demand}} > 0$ parameterizes investor demand
+sensitivity to premium for convertible issuance.
+\end{proof}
+
+\begin{remark}[Empirical Validation]
+Strategy's observed behavior closely matches the optimal rule:
+\begin{itemize}
+  \item In Q4 2024 ($\pi_t \approx 1.5$--$2.0$, well above threshold):
+    massive ATM equity issuance (\$15B+) and convertible issuance (\$5B).
+  \item In Q1--Q2 2025 ($\pi_t$ declining toward $0.5$--$1.0$):
+    shift to STRK and STRF preferred issuance.
+  \item In H2 2025--Q1 2026 ($\pi_t \approx 0.2$--$0.5$, near/below threshold):
+    heavy STRC, STRD issuance; STRE launched for EUR diversification.
+    ATM equity issuance slowed significantly (\$8.1B remaining capacity).
+\end{itemize}
+The progression from equity $\to$ convertibles $\to$ preferred
+as $\pi_t$ declines is consistent with Proposition~\ref{prop:optimal_channel}.
+\end{remark}
+
+\subsection{Weighted Average Cost of BTC Acquisition (WACBA)}
+
+\begin{definition}[WACBA]
+\label{def:wacba}
+The Weighted Average Cost of BTC Acquisition is
+\begin{equation}
+  \mathrm{WACBA}_t = \sum_{c \in \mathcal{C}} w_c(t)\, k_c(\pi_t, S_t),
+  \label{eq:wacba}
+\end{equation}
+where $\mathcal{C} = \{\mathrm{ATM}, \mathrm{conv}_1, \ldots,
+\mathrm{conv}_J, \mathrm{STRK}, \mathrm{STRF}, \mathrm{STRC},
+\mathrm{STRD}, \mathrm{STRE}\}$ is the set of financing channels,
+$w_c(t) = \Delta H_c(t) / \sum_{c'} \Delta H_{c'}(t)$ is the share
+of BTC acquired through channel $c$ over a trailing window, and
+$k_c(\pi_t, S_t)$ is the effective cost defined in
+\S\ref{sec:optimal_capital}.1.
+\end{definition}
+
+WACBA is analogous to the Weighted Average Cost of Capital (WACC)
+in corporate finance, but measures the blended cost of the firm's
+BTC acquisition program rather than its capital structure per se.
+
+\begin{proposition}[WACBA Minimization]
+\label{prop:wacba_min}
+The management optimization problem is:
+\begin{equation}
+  \min_{\{w_c\}_{c \in \mathcal{C}}} \mathrm{WACBA}_t
+  \quad \text{subject to} \quad
+  \begin{cases}
+    w_c \ge 0, \quad \sum_c w_c = 1, \\
+    w_c \le \bar{w}_c(t) \quad \text{(capacity constraints)}, \\
+    \sum_c D_c(t) \le \bar{D}(t) \quad \text{(leverage constraint)}, \\
+    \sum_c d_c w_c \le \bar{d}(t) \quad \text{(dividend coverage)}.
+  \end{cases}
+  \label{eq:wacba_min}
+\end{equation}
+\end{proposition}
+
+The capacity constraints $\bar{w}_c(t)$ reflect remaining ATM program
+authorizations: \$8.1B common equity, \$20.3B STRK, \$3.6B STRC,
+\$4.2B STRD, \$2.1B STRF.
+The leverage constraint ensures $\mathrm{ILE}_t$ does not exceed
+a prudential bound.
+The dividend coverage constraint ensures the annual preferred dividend
+obligation ($\approx$\$976.6M) remains serviceable from BTC holdings
+or cash reserves (\$2.25B, providing 2.5 years of coverage).
+
+\subsection{Endogenous Leverage Dynamics}
+\label{subsec:endo_leverage}
+
+The interaction between premium, financing, and leverage creates
+procyclical dynamics.
+
+\begin{proposition}[Procyclical Leverage]
+\label{prop:procyclical}
+Under the structural model of Section~2, leverage dynamics are procyclical:
+\begin{enumerate}
+  \item \textbf{Bull market} ($S_t$ rising, $\pi_t$ high):
+    \begin{itemize}
+      \item ATM equity issuance is accretive ($\pi_t > \log\mathrm{ILE}_t$).
+      \item Equity issuance increases $N_t^{\mathrm{sh}}$ and raises cash
+        for BTC purchases, increasing $H_t$.
+      \item Rising $S_t$ increases $A_t = H_t S_t$ faster than $D_t$,
+        so $\mathrm{ILE}_t = A_t/(A_t - D_t) \to 1$.
+      \item Leverage \emph{falls}.
+    \end{itemize}
+
+  \item \textbf{Bear market} ($S_t$ falling, $\pi_t$ low):
+    \begin{itemize}
+      \item ATM equity issuance becomes dilutive.
+      \item Financing shifts to preferred stock (no common dilution
+        but perpetual obligations).
+      \item Falling $S_t$ decreases $A_t$ while $D_t$ is fixed,
+        so $\mathrm{ILE}_t \to \infty$ as $A_t \to D_t$.
+      \item Leverage \emph{rises}.
+    \end{itemize}
+\end{enumerate}
+\end{proposition}
+
+\begin{proof}
+Differentiating $\mathrm{ILE}_t = A_t/(A_t - D_t)$ with respect to $S_t$:
+\[
+  \frac{\partial\,\mathrm{ILE}_t}{\partial S_t}
+  = \frac{-D_t H_t}{(H_t S_t - D_t)^2} < 0.
+\]
+So ILE is decreasing in $S_t$: leverage falls as BTC price rises
+and rises as BTC price falls. The financing channel switch
+(Proposition~\ref{prop:optimal_channel}) amplifies this:
+in bull markets the firm issues equity (deleveraging),
+while in bear markets it issues debt-like preferred (adding obligations).
+\end{proof}
+
+This procyclicality connects to the margin spiral mechanism of
+\citet{brunnermeier2009market}. In their framework, declining asset
+values tighten funding constraints, forcing deleveraging that further
+depresses prices. Strategy's variant is distinct: it does not face
+margin calls on BTC (which is unlevered on-balance-sheet), but the
+\emph{inability to issue accretive equity} in bear markets forces
+reliance on expensive preferred financing, degrading the capital
+structure and increasing the BTC price level required for future
+accretive equity issuance.
+
+\begin{corollary}[Leverage Spiral Condition]
+\label{cor:leverage_spiral}
+A destabilizing leverage spiral occurs if the preferred dividend burden
+grows faster than BTC asset income. Formally, instability arises when
+\begin{equation}
+  \frac{d}{dt}\!\left(\sum_j d_j L_j\right) >
+  \frac{d}{dt}\!\left(\mu_S \cdot H_t S_t\right),
+  \label{eq:leverage_spiral}
+\end{equation}
+where $\mu_S$ is the expected BTC return. At current parameters,
+with \$976.6M annual preferred dividends, expected BTC return
+$\mu_S = 11.1\%$, and BTC assets of \$56.25B, the right-hand side
+(\$6.24B) far exceeds the left-hand side, providing substantial buffer.
+However, a sustained BTC decline to $S_t \approx \$15{,}000$--$\$20{,}000$
+would close this gap.
+\end{corollary}
