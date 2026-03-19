@@ -1,0 +1,671 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{geometry}
+\geometry{margin=1in}
+
+\title{A Stochastic Structural Framework for Measuring\\
+Implied Bitcoin Accretion in MicroStrategy Equity:\\
+Corrected Model and Implementation Plan}
+\author{}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Objectives and Scope}
+
+The goal of this project is to:
+\begin{itemize}
+  \item Build a mathematically consistent structural model linking Bitcoin (BTC) price dynamics, MicroStrategy (MSTR) BTC holdings, its balance-sheet leverage, and the equity premium over net asset value (NAV).
+  \item Distinguish between:
+  \begin{itemize}
+    \item \emph{Structural balance-sheet leverage} (from assets and debt).
+    \item \emph{Total equity elasticity} (including the response of the premium to BTC).
+    \item \emph{Total BTC growth} versus \emph{per-share BTC accretion}.
+  \end{itemize}
+  \item Calibrate the model to publicly available data.
+  \item Compute and visualize:
+    \begin{itemize}
+      \item Implied BTC Growth Rate (IBGR) -- total and per-share.
+      \item Implied Leverage Elasticity (ILE).
+      \item Total Equity Elasticity (TEE).
+      \item Premium Mean-Reversion Index (PMRI).
+      \item Implied Funding Requirement Distribution (IFRD).
+      \item Survival / recapitalization probabilities.
+    \end{itemize}
+  \item Implement the full pipeline in Python with clear data ingestion, calibration, simulation, and reporting.
+\end{itemize}
+
+\section{Model Specification}
+
+\subsection{State Variables, Measures, and Balance Sheet}
+
+We work on a filtered probability space
+$(\Omega,\mathcal F,(\mathcal F_t)_{t \ge 0})$
+with two measures:
+\begin{itemize}
+  \item $\mathbb P$: historical (real-world) measure, used for premium dynamics, management behavior (holdings), and survival/IFRD analysis.
+  \item $\mathbb Q$: risk-neutral measure, used (if needed) to calibrate BTC volatility/jump parameters to options.
+\end{itemize}
+
+State variables:
+\begin{itemize}
+  \item $S_t$: BTC (BTC-USD) price.
+  \item $H_t$: MicroStrategy BTC holdings (in BTC).
+  \item $D_t$: outstanding debt (face-value), modeled deterministically at baseline.
+  \item $A_t$: BTC asset value,
+  $$
+    A_t = H_t S_t.
+  $$
+  \item $P_t$: MSTR share price.
+  \item $N_t^{\text{sh}}$: number of MSTR shares outstanding.
+  \item $E_t$: equity market value,
+  $$
+    E_t = P_t N_t^{\text{sh}}.
+  $$
+  \item $B_t$: BTC per share,
+  $$
+    B_t = \frac{H_t}{N_t^{\text{sh}}}.
+  $$
+\end{itemize}
+
+Define net asset value (NAV) with limited liability:
+$$
+  \text{NAV}_t = (A_t - D_t)^+ = \max(H_t S_t - D_t, 0).
+$$
+
+When computing the historical log-premium from data we will:
+\begin{itemize}
+  \item Introduce a small floor $\varepsilon > 0$ to avoid log singularities:
+  $$
+    \text{NAV}_t^{\text{clip}} = \max(A_t - D_t, \varepsilon),
+  $$
+  \item and define
+  $$
+    \pi_t = \log\left(\frac{E_t}{\text{NAV}_t^{\text{clip}}}\right).
+  $$
+\end{itemize}
+Periods where $A_t \approx D_t$ will be tagged as a ``distress regime'' and treated carefully in calibration.
+
+\subsection{BTC Price Dynamics}
+
+Under the risk-neutral measure $\mathbb Q$, for option calibration we consider a jump-diffusion:
+$$
+  \frac{dS_t}{S_{t^-}} =
+  \left(r_t - q_S - \lambda_S k_S \right) dt
+  + \sigma_S(S_t,t)\,dW_t^{S,\mathbb Q}
+  + \left(e^{Y_S} - 1 \right) dN_t^S,
+$$
+where:
+\begin{itemize}
+  \item $r_t$ is the risk-free rate (deterministic or piecewise constant).
+  \item $q_S$ is any BTC ``carry'' term (set $q_S = 0$ initially).
+  \item $W_t^{S,\mathbb Q}$ is a Brownian motion under $\mathbb Q$.
+  \item $N_t^S$ is a Poisson process with intensity $\lambda_S$.
+  \item $Y_S$ is the (log-)jump size, with distribution $\nu_S$.
+  \item $k_S = \mathbb E[e^{Y_S}-1]$ is the jump compensator.
+  \item $\sigma_S(S_t,t)$ is a (possibly) state-dependent volatility surface calibrated to options.
+\end{itemize}
+
+For historical $\mathbb P$-measure simulations focusing on survival and IFRD, a simpler GBM with constant volatility fitted to BTC returns is acceptable as a first step:
+$$
+  \frac{dS_t}{S_t} = \mu_S dt + \sigma_S dW_t^{S,\mathbb P}.
+$$
+
+\subsection{Premium Dynamics under $\mathbb P$}
+
+We model the log-premium $\pi_t$ as an Ornstein--Uhlenbeck (OU) process under $\mathbb P$ (management and sentiment world), with optional jumps:
+$$
+  d\pi_t = \kappa(\theta - \pi_t) dt
+           + \sigma_\pi dW_t^{\pi,\mathbb P}
+           + \eta_\pi dJ_t^\pi,
+$$
+where:
+\begin{itemize}
+  \item $\kappa > 0$ is the mean-reversion speed.
+  \item $\theta$ is the long-run mean premium.
+  \item $\sigma_\pi$ is the volatility of premium.
+  \item $W_t^{\pi,\mathbb P}$ is a Brownian motion under $\mathbb P$.
+  \item $J_t^\pi$ is a pure-jump process with intensity $\lambda_\pi$ (can be set to zero initially).
+  \item The Brownian motions are correlated:
+  $$
+    \text{corr}(dW_t^{S,\mathbb P}, dW_t^{\pi,\mathbb P}) = \rho.
+  $$
+\end{itemize}
+
+Discrete-time approximation for daily step $\Delta t$ (ignoring jumps initially):
+$$
+  \pi_{t+\Delta t}
+  = \pi_t
+    + \kappa(\theta - \pi_t) \Delta t
+    + \sigma_\pi \sqrt{\Delta t}\,Z_\pi,
+$$
+with $(Z_S,Z_\pi)$ bivariate normal and $\text{corr}(Z_S,Z_\pi)=\rho$.
+
+\subsection{BTC Holding Dynamics (Flywheel) under $\mathbb P$}
+
+We encode the ``leverage flywheel'' via an endogenous BTC holding process:
+$$
+  dH_t = \alpha\,\pi_t^+ dt + dH_t^{\text{jump}},
+  \quad \pi_t^+ = \max(\pi_t,0),
+$$
+where the jump component captures discrete financing events:
+$$
+  dH_t^{\text{jump}} = \sum_{k} \Delta H_{\tau_k}\,\delta_{t=\tau_k},
+  \qquad \Delta H_{\tau_k} \ge 0.
+$$
+
+Here:
+\begin{itemize}
+  \item $\{\tau_k\}$ are event times of a Poisson process $M_t$ with intensity $\lambda_M$.
+  \item $\Delta H_{\tau_k}$ are BTC amounts purchased using financing proceeds.
+\end{itemize}
+
+In discrete time:
+\begin{itemize}
+  \item Draw $N_t^M \sim \text{Poisson}(\lambda_M \Delta t)$.
+  \item Draw jump sizes $\Delta H_{t,1},\dots,\Delta H_{t,N_t^M}$ from a distribution $\mathcal D_H$.
+  \item Update
+  $$
+    H_{t+\Delta t}
+    = H_t + \alpha \pi_t^+ \Delta t
+          + \sum_{i=1}^{N_t^M} \Delta H_{t,i},
+    \qquad H_{t+\Delta t} \ge 0.
+  $$
+\end{itemize}
+
+Calibration choices:
+\begin{itemize}
+  \item $\alpha$ is estimated on aggregated (weekly/monthly) holding changes to avoid daily noise.
+  \item If data suggests $\alpha \approx 0$, we can set $\alpha=0$ and model all accretion as jumps, potentially with $\lambda_M$ depending on the premium (e.g. $\lambda_M(\pi_t)$).
+  \item As an extension, the jump intensity or sizes can be made to depend on leverage (e.g. $\beta_{LS}(t)$) to capture over-leverage constraints.
+\end{itemize}
+
+\subsection{Debt Process and Convertibles}
+
+At baseline, we treat total debt as deterministic piecewise-constant:
+$$
+  D_t = \sum_{j=1}^J D_j \mathbf 1_{\{t < T_j\}},
+$$
+where each instrument $j$ has face value $D_j$ and maturity $T_j$.
+This is conservative for solvency analysis, especially for convertible notes (we ignore their equity-like behavior when deep in the money).
+
+In implementation, each instrument will be represented by a \texttt{DebtInstrument} object with fields:
+\begin{itemize}
+  \item Face value, coupon, issue date, maturity date.
+  \item Convertible flag, conversion price, and other relevant terms.
+\end{itemize}
+
+This allows an extension where an ``effective debt'' $D_t^{\text{eff}}$ discounts the equity-like component of deep in-the-money convertibles.
+
+\subsection{Share-Count Dynamics and BTC per Share}
+
+To distinguish total BTC growth from per-share accretion, we model the share count:
+$$
+  dN_t^{\text{sh}} = dN_t^{\text{(equity)}} + dN_t^{\text{(conv)}},
+$$
+where:
+\begin{itemize}
+  \item $dN_t^{\text{(equity)}}$ captures new stock issuance (e.g. ATMs, follow-ons).
+  \item $dN_t^{\text{(conv)}}$ captures conversion of convertible notes.
+\end{itemize}
+
+In practice, both components are lumpy and are best modeled as jump processes with event times aligned with financing and conversion events.
+
+The BTC per share process is:
+$$
+  B_t = \frac{H_t}{N_t^{\text{sh}}}.
+$$
+Per-share accretion metrics will be defined in terms of $B_t$.
+
+\subsection{Equity Valuation, Structural Leverage, and Total Elasticity}
+
+The structural relation between equity, assets, debt, and premium is:
+$$
+  E_t = e^{\pi_t} \cdot (A_t - D_t)^+ = e^{\pi_t} (H_t S_t - D_t)^+.
+$$
+
+\paragraph{Implied Leverage Elasticity (ILE).}
+Define the \emph{structural} leverage elasticity as the sensitivity of equity to BTC price, ignoring instantaneous changes in premium:
+$$
+  \beta_{LS}(t)
+  = \frac{\partial \log E_t}{\partial \log S_t}\bigg|_{\pi_t \text{ fixed}}
+  \approx \frac{H_t S_t}{H_t S_t - D_t},
+$$
+whenever $H_t S_t > D_t$.
+This depends only on the current balance sheet and is independent of $\pi_t$.
+
+\paragraph{Total Equity Elasticity (TEE).}
+In reality, $\pi_t$ typically depends on BTC shocks. From
+$$
+  \log E_t = \pi_t + \log(H_t S_t - D_t),
+$$
+one obtains
+$$
+  \frac{d \log E_t}{d \log S_t}
+  = \frac{d \pi_t}{d \log S_t}
+    + \frac{H_t S_t}{H_t S_t - D_t}.
+$$
+Define the \emph{Total Equity Elasticity}
+$$
+  \beta_{\text{TOT}}(t)
+  = \frac{d \log E_t}{d \log S_t}
+  \approx \gamma_{\pi S} + \beta_{LS}(t),
+$$
+where $\gamma_{\pi S}$ is the empirical sensitivity
+$$
+  \gamma_{\pi S} \approx
+  \frac{\text{Cov}(\Delta \pi_t, \Delta \log S_t)}{\text{Var}(\Delta \log S_t)},
+$$
+estimated via regression.
+We will report both $\beta_{LS}(t)$ (pure balance-sheet leverage) and $\beta_{\text{TOT}}(t)$ (what traders \emph{feel} in equity P\&L).
+
+\section{Implied Quantitative Indicators}
+
+\subsection{Implied BTC Growth Rate (IBGR)}
+
+\paragraph{Total IBGR.}
+Under the historical measure $\mathbb P$, define the expected total BTC holding growth over a short horizon $\Delta t$:
+$$
+  \mu_H
+  = \frac{1}{H_0}
+    \mathbb E^\mathbb P
+    \left[
+      \frac{H_{\Delta t} - H_0}{\Delta t}
+      \,\bigg|\,
+      S_0, \pi_0, H_0
+    \right].
+$$
+Using the holding dynamics for small $\Delta t$,
+$$
+  \mu_H \approx
+  \frac{1}{H_0}
+  \left(
+    \alpha \pi_0^+ + \lambda_M \mathbb E[\Delta H]
+  \right),
+$$
+where $\mathbb E[\Delta H]$ is the mean BTC added per financing event.
+
+\paragraph{Per-Share IBGR.}
+Define BTC per share $B_t = H_t / N_t^{\text{sh}}$.
+Per-share accretion is captured by
+$$
+  \mu_{H/N}
+  =
+  \frac{1}{B_0}
+  \mathbb E^\mathbb P
+  \left[
+    \frac{B_{\Delta t} - B_0}{\Delta t}
+    \,\bigg|\,
+    S_0, \pi_0, H_0, N_0^{\text{sh}}
+  \right].
+$$
+Exact closed form is messy; in practice we will:
+\begin{itemize}
+  \item Simulate joint paths of $(H_t,N_t^{\text{sh}})$ under the calibrated dynamics.
+  \item Estimate $\mu_{H/N}$ via Monte Carlo.
+\end{itemize}
+Positive $\mu_{H/N}$ indicates \emph{accretive} BTC growth per share.
+
+\subsection{Implied Leverage Elasticity (ILE)}
+
+As above, for a given state $(S_t,H_t,D_t)$,
+$$
+  \text{ILE}_t = \beta_{LS}(t)
+  = \frac{H_t S_t}{H_t S_t - D_t},
+$$
+whenever $H_t S_t > D_t$.
+This is purely a function of balance-sheet leverage.
+
+\subsection{Total Equity Elasticity (TEE)}
+
+Given the empirical $\gamma_{\pi S}$ and current $\beta_{LS}(t)$:
+$$
+  \beta_{\text{TOT}}(t)
+  \approx \gamma_{\pi S} + \beta_{LS}(t).
+$$
+This indicator captures the full sensitivity of equity to BTC, including premium dynamics.
+
+\subsection{Premium Mean-Reversion Index (PMRI)}
+
+For the OU process (ignoring jumps), the stationary variance is
+$$
+  \text{Var}^{\text{ss}}(\pi_t) = \frac{\sigma_\pi^2}{2\kappa}.
+$$
+Define the z-score:
+$$
+  \text{PMRI} =
+  \frac{\pi_0 - \theta}{\sigma_\pi / \sqrt{2\kappa}},
+$$
+with large positive values indicating exuberant premium, and negative values indicating discount/stress.
+
+\subsection{Implied Funding Requirement Distribution (IFRD)}
+
+The cumulative dollar cost of BTC acquisitions over horizon $\Delta t$ is
+$$
+  G_{\Delta t} = \int_0^{\Delta t} S_u\,dH_u.
+$$
+Using the decomposition:
+$$
+  G_{\Delta t}
+  = \int_0^{\Delta t} S_u \alpha \pi_u^+\,du
+    + \sum_{0 < u \le \Delta t} S_u \Delta H_u.
+$$
+
+In discrete form for simulated paths:
+$$
+  G_{\Delta t}^{(\text{path})}
+  \approx \sum_{k=0}^{n-1} S_{t_k} (H_{t_{k+1}} - H_{t_k}).
+$$
+Monte Carlo over many paths provides the empirical distribution of $G_{\Delta t}$:
+mean, variance, and VaR/ES (e.g. $\text{VaR}_{95\%}(G_{\Delta t})$).
+
+\subsection{Survival and Recapitalization Probabilities}
+
+Define a distress threshold with buffer $\varepsilon \ge 0$:
+$$
+  A_t \le (1+\varepsilon) D_t
+  \quad \Longleftrightarrow \quad
+  H_t S_t \le (1+\varepsilon) D_t.
+$$
+Let
+$$
+  \tau = \inf \{ u \in [0,T] : A_u \le (1+\varepsilon) D_u \}
+$$
+be the first-passage time to distress.
+
+Simulating under $\mathbb P$:
+\begin{itemize}
+  \item The survival probability is
+  $$
+    \mathbb P(\tau > T) \approx 
+    \frac{\#\{\text{paths with no hit before } T\}}{\#\{\text{total paths}\}}.
+  $$
+  \item Recapitalization probabilities can be defined with thresholds on equity, premium, or funding requirements.
+\end{itemize}
+
+\section{Data Requirements and Download Instructions}
+
+All series should be aligned to a common daily date index.
+
+\subsection{BTC Price and Derivatives}
+
+\paragraph{BTC Spot/OHLCV.}
+\begin{itemize}
+  \item BTC-USD daily close (or OHLCV) series $S_t$.
+  \item Sources:
+  \begin{itemize}
+    \item Yahoo Finance (\texttt{"BTC-USD"}), via web or \texttt{yfinance}.
+    \item CryptoDataDownload / CoinGecko / CoinMarketCap for CSV downloads.
+  \end{itemize}
+\end{itemize}
+
+\paragraph{BTC Options (Optional).}
+For a richer volatility/jump calibration under $\mathbb Q$:
+\begin{itemize}
+  \item Deribit BTC options chain.
+  \item CME BTC futures/options from a data vendor.
+\end{itemize}
+
+\subsection{MSTR Equity Data}
+
+\begin{itemize}
+  \item Daily MSTR share price $P_t$.
+  \item Shares outstanding $N_t^{\text{sh}}$ (quarterly + event-based).
+  \item Sources:
+  \begin{itemize}
+    \item Yahoo Finance (\texttt{"MSTR"}) for price.
+    \item SEC filings (10-K, 10-Q), MSTR investor relations, data sites for share count history.
+  \end{itemize}
+\end{itemize}
+
+\subsection{MicroStrategy BTC Holdings}
+
+\begin{itemize}
+  \item BTC holdings time series $H_t$ (in BTC).
+  \item Purchase events table: date, BTC added, USD notional, average price.
+  \item Sources:
+  \begin{itemize}
+    \item MicroStrategy / company site disclosures.
+    \item Corporate BTC tracking sites with CSV downloads.
+  \end{itemize}
+\end{itemize}
+
+\subsection{Debt Schedule and Financing Events}
+
+\begin{itemize}
+  \item Debt instruments: issue date, maturity, face value, coupon, convertible terms.
+  \item Financing events: equity issuance, new debt, conversions.
+  \item Sources:
+  \begin{itemize}
+    \item SEC EDGAR (10-K, 10-Q, 8-K).
+    \item Company press releases / investor presentations.
+  \end{itemize}
+\end{itemize}
+
+\subsection{Risk-Free Curve}
+
+\begin{itemize}
+  \item US Treasury yields (e.g. 1Y, 2Y) from FRED.
+  \item Simple version: use a constant annual risk-free rate (e.g. 3\%).
+\end{itemize}
+
+\section{Estimation and Calibration Plan}
+
+\subsection{Data Ingestion and Alignment}
+
+\begin{enumerate}
+  \item Download BTC, MSTR price series, holdings, debt schedule, shares outstanding as CSV or via APIs.
+  \item In Python (\texttt{pandas}), build a daily date index from first BTC purchase to latest data.
+  \item Merge:
+  \begin{itemize}
+    \item Forward-fill $H_t$, $D_t$, and $N_t^{\text{sh}}$ between known dates.
+    \item For non-trading days for MSTR, forward-fill $P_t$ or work on trading-day-only calendar.
+  \end{itemize}
+  \item Compute derived series:
+  \begin{itemize}
+    \item $A_t = H_t S_t$.
+    \item $\text{NAV}_t = (A_t - D_t)^+$.
+    \item $\text{NAV}_t^{\text{clip}} = \max(A_t - D_t,\varepsilon)$.
+    \item $E_t = P_t N_t^{\text{sh}}$.
+    \item $\pi_t = \log(E_t / \text{NAV}_t^{\text{clip}})$.
+    \item $B_t = H_t / N_t^{\text{sh}}$.
+  \end{itemize}
+  \item Tag dates with $A_t \approx D_t$ (or $\text{NAV}_t$ close to zero) as distress regime indicators.
+\end{enumerate}
+
+\subsection{Calibration of Premium OU under $\mathbb P$}
+
+\begin{enumerate}
+  \item Use daily (or business-day) steps $\Delta t = 1/252$.
+  \item Exclude distress-regime datapoints or treat them separately.
+  \item Use the exact OU transition:
+  $$
+    \pi_{t+\Delta t}
+    = \theta + (\pi_t - \theta)e^{-\kappa \Delta t}
+      + \sigma_\pi \sqrt{\frac{1 - e^{-2\kappa\Delta t}}{2\kappa}}\,Z_t,
+  $$
+  and perform maximum likelihood or nonlinear least squares to estimate $(\kappa,\theta,\sigma_\pi)$.
+  \item Estimate $\rho$ by empirical correlation between BTC log returns $\Delta \log S_t$ and premium changes $\Delta \pi_t$.
+  \item Estimate $\gamma_{\pi S}$ via regression of $\Delta \pi_t$ on $\Delta \log S_t$ to obtain total elasticity.
+\end{enumerate}
+
+\subsection{Calibration of BTC Holding Dynamics}
+
+\begin{enumerate}
+  \item Construct $\Delta H_t$ (changes in holdings) and identify financing event dates from disclosures.
+  \item Build weekly or monthly aggregates:
+  $$
+    \Delta H^{(W)}_t, \quad \overline{\pi_t^+}^{(W)}.
+  $$
+  \item On non-event periods, regress:
+  $$
+    \Delta H^{(W)}_t \approx \alpha \overline{\pi_t^+}^{(W)} \Delta t + \varepsilon_t,
+  $$
+  to estimate $\alpha$ (if statistically significant).
+  \item Treat event days as jumps:
+  \begin{itemize}
+    \item Jump sizes are the $\Delta H_t$ on those dates.
+    \item Jump intensity $\lambda_M \approx N_{\text{events}} / T_{\text{years}}$.
+    \item Estimate $\mathbb E[\Delta H]$ and $\mathcal D_H$ (empirical distribution).
+  \end{itemize}
+  \item If $\alpha$ is not significantly different from zero, set $\alpha=0$ and move to a pure jump-based accumulation model (possibly with $\lambda_M$ made premium-dependent).
+\end{enumerate}
+
+\subsection{Calibration of BTC Price Dynamics}
+
+\begin{itemize}
+  \item Baseline: estimate constant volatility $\sigma_S$ from historical BTC log returns (under $\mathbb P$).
+  \item If using options, calibrate more sophisticated $\sigma_S(S_t,t)$ and jump parameters $(\lambda_S,\nu_S)$ under $\mathbb Q$.
+\end{itemize}
+
+\subsection{Share-Count and Convertible Calibration}
+
+\begin{itemize}
+  \item From equity and convertible issuance disclosures, reconstruct
+        $N_t^{\text{sh}}$ and event-driven changes.
+  \item Optionally model future issuance/convertible conversion behavior as a function of premium and leverage (e.g. intensities depending on $\pi_t$ and $\beta_{LS}(t)$).
+\end{itemize}
+
+\subsection{Indicator Computation}
+
+\begin{enumerate}
+  \item Use closed-form formulas where available:
+  \begin{itemize}
+    \item IBGR (total) from $(\alpha,\lambda_M,\mathbb E[\Delta H])$ and $H_0$.
+    \item ILE from $(H_t,S_t,D_t)$.
+    \item PMRI from OU parameters and current $\pi_0$.
+    \item TEE from $\gamma_{\pi S}$ and current $\beta_{LS}(t)$.
+  \end{itemize}
+  \item For IFRD, per-share IBGR, and survival probabilities, run Monte Carlo simulations under $\mathbb P$.
+\end{enumerate}
+
+\section{Implementation Plan in Python}
+
+\subsection{Project Structure}
+
+A possible directory layout:
+\begin{verbatim}
+project_root/
+  data_raw/
+  data_processed/
+  src/
+    data_io.py
+    preprocessing.py
+    instruments.py
+    calibration.py
+    simulation.py
+    indicators.py
+    plots.py
+  notebooks/
+  results/
+\end{verbatim}
+
+\subsection{Core Modules}
+
+\paragraph{1. \texttt{data\_io.py}}
+\begin{itemize}
+  \item \texttt{load\_btc\_prices():} load/download BTC-USD historical prices.
+  \item \texttt{load\_mstr\_prices():} load/download MSTR prices.
+  \item \texttt{load\_btc\_holdings():} read BTC holdings and event history.
+  \item \texttt{load\_debt\_schedule():} read debt instruments.
+  \item \texttt{load\_shares\_outstanding():} reconstruct $N_t^{\text{sh}}$.
+\end{itemize}
+
+\paragraph{2. \texttt{instruments.py}}
+\begin{itemize}
+  \item Define a \texttt{DebtInstrument} class with maturity, coupon, face value, and convertible fields.
+  \item Provide methods to compute outstanding face at time $t$ and, later, effective debt.
+\end{itemize}
+
+\paragraph{3. \texttt{preprocessing.py}}
+\begin{itemize}
+  \item \texttt{build\_daily\_panel():}
+  \begin{itemize}
+    \item Merge BTC, MSTR, holdings, debt, and shares.
+    \item Compute $A_t$, $\text{NAV}_t$, $\text{NAV}_t^{\text{clip}}$, $E_t$, $\pi_t$, $B_t$.
+    \item Tag distress regime indicators.
+  \end{itemize}
+\end{itemize}
+
+\paragraph{4. \texttt{calibration.py}}
+\begin{itemize}
+  \item \texttt{fit\_ou\_premium(pi\_series):} estimate $(\kappa,\theta,\sigma_\pi)$ and OU diagnostics.
+  \item \texttt{estimate\_rho\_and\_gamma(btc\_returns, premium\_changes):} estimate $\rho$ and $\gamma_{\pi S}$.
+  \item \texttt{fit\_holding\_dynamics(H\_series, pi\_series, event\_flags):} estimate $\alpha,\lambda_M,\mathbb E[\Delta H]$.
+  \item \texttt{fit\_btc\_vol(btc\_returns):} estimate $\sigma_S$.
+\end{itemize}
+
+\paragraph{5. \texttt{simulation.py}}
+\begin{itemize}
+  \item Vectorized simulation of $(S_t,\pi_t,H_t,N_t^{\text{sh}},D_t,E_t)$ under $\mathbb P$.
+  \item Implementation details:
+  \begin{itemize}
+    \item Construct the correlation matrix
+    $$
+      \Sigma =
+      \begin{pmatrix}
+        1 & \rho \\
+        \rho & 1
+      \end{pmatrix}
+    $$
+    and its Cholesky factor once.
+    \item At each time step, draw independent standard normals and multiply by the Cholesky factor to obtain correlated $(Z_S,Z_\pi)$.
+    \item Simulate jumps via Poisson draws and jump distributions.
+  \end{itemize}
+\end{itemize}
+
+\paragraph{6. \texttt{indicators.py}}
+\begin{itemize}
+  \item \texttt{compute\_IBGR(params, state0):} compute total IBGR.
+  \item \texttt{compute\_IBGR\_per\_share(simulated\_B\_paths):} estimate $\mu_{H/N}$ from Monte Carlo.
+  \item \texttt{compute\_ILE(panel):} compute $\beta_{LS}(t)$ over time.
+  \item \texttt{compute\_TEE(panel, gamma\_piS):} compute $\beta_{\text{TOT}}(t)$.
+  \item \texttt{compute\_PMRI(params, pi0):} compute PMRI.
+  \item \texttt{compute\_IFRD(sim\_paths):} compute IFRD distribution from pathwise $G_{\Delta t}$.
+  \item \texttt{compute\_survival(sim\_paths, eps, T):} compute survival probabilities.
+\end{itemize}
+
+\paragraph{7. \texttt{plots.py}}
+\begin{itemize}
+  \item Time series plots for $(S_t,H_t,N_t^{\text{sh}},B_t,\pi_t,\text{NAV}_t,E_t)$.
+  \item Scatter of $\Delta B_t$ vs $\pi_t$ (accretion vs premium).
+  \item IFRD histograms, leverage elasticity distributions, and survival probability curves.
+\end{itemize}
+
+\subsection{Coding Checklist}
+
+\begin{enumerate}
+  \item Implement data loaders and build the daily panel.
+  \item Fit OU premium parameters and estimate $\rho,\gamma_{\pi S}$.
+  \item Estimate holding dynamics $(\alpha,\lambda_M,\mathbb E[\Delta H])$; decide if continuous term is necessary.
+  \item Estimate BTC volatility and (optionally) jump parameters.
+  \item Implement vectorized simulation of joint paths under $\mathbb P$.
+  \item Compute IBGR (total and per-share), ILE, TEE, PMRI.
+  \item Simulate IFRD and survival curves and generate plots.
+\end{enumerate}
+
+\section{Deliverables}
+
+\begin{itemize}
+  \item A cleaned, reproducible daily panel with $S_t,P_t,H_t,D_t,N_t^{\text{sh}},A_t,\text{NAV}_t,\text{NAV}_t^{\text{clip}},E_t,\pi_t,B_t$.
+  \item A parameter report: $(\kappa,\theta,\sigma_\pi,\rho,\gamma_{\pi S},\alpha,\lambda_M,\mathbb E[\Delta H],\sigma_S)$.
+  \item A Monte Carlo engine for $(S_t,\pi_t,H_t,N_t^{\text{sh}},D_t,E_t)$ under $\mathbb P$.
+  \item Indicator dashboards (notebooks/scripts) presenting:
+  \begin{itemize}
+    \item Total and per-share IBGR.
+    \item ILE time series and current value.
+    \item TEE time series and current value.
+    \item PMRI and its history.
+    \item IFRD distribution and summary stats.
+    \item Survival probabilities vs horizon $T$ and stress buffer $\varepsilon$.
+    \item BTC-per-share vs premium plots to visually test accretion efficiency.
+  \end{itemize}
+  \item A written interpretation explaining whether current MSTR pricing implies realistic BTC accretion and leverage profiles, given historical behavior and calibrated parameters.
+\end{itemize}
+
+\end{document}

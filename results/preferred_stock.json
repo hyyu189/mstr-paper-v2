@@ -1,0 +1,58 @@
+{
+  "total_liquidation_value": 10229353900.0,
+  "total_annual_dividend": 976573822.0,
+  "convertible_shares": 12780784.0,
+  "conversion_dilution_shares": 1278078.4000000001,
+  "series": [
+    {
+      "ticker": "STRK",
+      "name": "Strike",
+      "liquidation_pref_per_share": 100.0,
+      "dividend_rate_pct": 8.0,
+      "shares_outstanding": 12780784.0,
+      "is_convertible": true,
+      "total_liquidation_value": 1278078400.0,
+      "total_annual_dividend": 102246272.0
+    },
+    {
+      "ticker": "STRF",
+      "name": "Strife",
+      "liquidation_pref_per_share": 100.0,
+      "dividend_rate_pct": 10.0,
+      "shares_outstanding": 10512755.0,
+      "is_convertible": false,
+      "total_liquidation_value": 1051275500.0,
+      "total_annual_dividend": 105127550.0
+    },
+    {
+      "ticker": "STRC",
+      "name": "Stretch",
+      "liquidation_pref_per_share": 100.0,
+      "dividend_rate_pct": 9.584,
+      "shares_outstanding": 50000000.0,
+      "is_convertible": false,
+      "total_liquidation_value": 5000000000.0,
+      "total_annual_dividend": 479200000.0
+    },
+    {
+      "ticker": "STRD",
+      "name": "Stride",
+      "liquidation_pref_per_share": 100.0,
+      "dividend_rate_pct": 10.0,
+      "shares_outstanding": 25000000.0,
+      "is_convertible": false,
+      "total_liquidation_value": 2500000000.0,
+      "total_annual_dividend": 250000000.0
+    },
+    {
+      "ticker": "STRE",
+      "name": "Stream",
+      "liquidation_pref_per_share": 80.0,
+      "dividend_rate_pct": 10.0,
+      "shares_outstanding": 5000000.0,
+      "is_convertible": false,
+      "total_liquidation_value": 400000000.0,
+      "total_annual_dividend": 40000000.0
+    }
+  ]
+}

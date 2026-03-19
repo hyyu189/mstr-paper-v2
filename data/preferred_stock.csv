@@ -1,0 +1,6 @@
+ticker,name,issue_date,liquidation_pref_per_share,dividend_rate_pct,annual_dividend_per_share,shares_outstanding,is_convertible,conversion_ratio_to_mstr,seniority_rank
+STRK,Strike,2025-02-05,100.00,8.0,8.00,12780784,True,0.1,4
+STRF,Strife,2025-03-25,100.00,10.0,10.00,10512755,False,0.0,1
+STRC,Stretch,2025-07-18,100.00,9.584,9.584,50000000,False,0.0,2
+STRD,Stride,2025-09-15,100.00,10.0,10.00,25000000,False,0.0,3
+STRE,Stream,2025-10-01,80.00,10.0,8.00,5000000,False,0.0,5

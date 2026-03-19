@@ -1,0 +1,22 @@
+{
+  "current_date": "2026-03-17",
+  "S0": 73909.36,
+  "H0": 761068.0,
+  "D0": 8222070000.0,
+  "N0": 320440000.0,
+  "preferred_liq_total": 10229353900.0,
+  "preferred_annual_div_total": 976573822.0,
+  "pi0": 0.24216726950671505,
+  "ILE_current": 1.488150665547579,
+  "TEE_current": -2.108878088109561,
+  "PMRI_current": -0.7134605135110367,
+  "IBGR_total_current": 0.17630219649906664,
+  "IBGR_per_share_3y": 0.1761834832175858,
+  "IFRD_mean": 35327916376.529175,
+  "IFRD_p95": 71779486368.09663,
+  "survival_prob_3y_eps0": 0.919,
+  "survival_prob_3y_eps10pct": 0.8908,
+  "dividend_coverage_ratio_current": 49.18008010712374,
+  "dividend_coverage_ratio_3y_mean": 113.69384101704367,
+  "dividend_coverage_prob_undercovered_3y": 0.01
+}

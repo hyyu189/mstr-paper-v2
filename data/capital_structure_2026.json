@@ -1,0 +1,215 @@
+{
+  "as_of_date": "2026-03-16",
+  "company_name": "Strategy Inc (formerly MicroStrategy)",
+  "ticker": "MSTR",
+
+  "bitcoin_holdings": {
+    "total_btc": 761068,
+    "avg_cost_per_btc_usd": 66384.56,
+    "total_cost_basis_usd": 33139000000,
+    "market_value_usd": 56890000000,
+    "note": "As of March 16, 2026 per company disclosures. Q4 2025 earnings reported 713,502 BTC as of Feb 5, 2026."
+  },
+
+  "common_equity": {
+    "ticker": "MSTR",
+    "class": "Class A Common Stock",
+    "shares_outstanding": 333750000,
+    "shares_outstanding_date": "2026-03",
+    "diluted_shares_q3_2025": 315390000,
+    "exchange": "NASDAQ",
+    "note": "Shares increased ~44% YoY due to ATM issuance and convertible note conversions."
+  },
+
+  "preferred_stock": {
+    "STRK": {
+      "name": "Strike",
+      "full_name": "8.00% Series A Perpetual Strike Preferred Stock",
+      "type": "convertible_perpetual_preferred",
+      "ipo_date": "2025-02-05",
+      "ipo_shares": 7300000,
+      "ipo_price_usd": 80.00,
+      "stated_amount_usd": 100.00,
+      "dividend_rate_pct": 8.0,
+      "dividend_type": "cumulative",
+      "dividend_frequency": "quarterly",
+      "convertible": true,
+      "conversion_ratio": 0.1,
+      "conversion_price_mstr": 1000.00,
+      "atm_program_size_usd": 21000000000,
+      "atm_remaining_usd": 20300000000,
+      "atm_remaining_date": "2026-02-01",
+      "gross_proceeds_ipo_usd": 584000000,
+      "net_proceeds_ipo_usd": 563400000,
+      "exchange": "NASDAQ",
+      "note": "Only ~$700M of $21B ATM utilized as of Feb 2026. Converts to 0.1 MSTR shares per STRK share."
+    },
+    "STRF": {
+      "name": "Strife",
+      "full_name": "10.00% Series A Perpetual Strife Preferred Stock",
+      "type": "non_convertible_perpetual_preferred",
+      "ipo_date": "2025-03-21",
+      "ipo_shares": 8500000,
+      "ipo_price_usd": 85.00,
+      "stated_amount_usd": 100.00,
+      "dividend_rate_pct": 10.0,
+      "dividend_type": "cumulative",
+      "dividend_frequency": "quarterly",
+      "convertible": false,
+      "dividend_penalty": "1% increase per year if missed, up to 18% max",
+      "gross_proceeds_usd": 722500000,
+      "atm_program_size_usd": 2100000000,
+      "atm_launch_date": "2025-05-22",
+      "exchange": "NASDAQ",
+      "note": "Non-convertible. Compounding penalty for missed dividends incentivizes timely payment."
+    },
+    "STRD": {
+      "name": "Stride",
+      "full_name": "10.00% Series A Perpetual Stride Preferred Stock",
+      "type": "non_cumulative_perpetual_preferred",
+      "ipo_date": "2025-06-10",
+      "ipo_shares": 11764700,
+      "ipo_price_usd": 85.00,
+      "stated_amount_usd": 100.00,
+      "dividend_rate_pct": 10.0,
+      "dividend_type": "non_cumulative",
+      "dividend_frequency": "quarterly",
+      "convertible": false,
+      "net_proceeds_usd": 979700000,
+      "atm_program_size_usd": 4200000000,
+      "atm_launch_date": "2025-07-07",
+      "exchange": "NASDAQ",
+      "note": "Non-cumulative dividends; highest effective yield preferred. Dividends not mandatory."
+    },
+    "STRC": {
+      "name": "Stretch",
+      "full_name": "Variable Rate Series A Perpetual Stretch Preferred Stock",
+      "type": "variable_rate_perpetual_preferred",
+      "ipo_date": "2025-07-29",
+      "ipo_shares": 28011111,
+      "ipo_price_usd": 90.00,
+      "stated_amount_usd": 100.00,
+      "initial_dividend_rate_pct": 9.0,
+      "current_dividend_rate_pct": 11.5,
+      "current_rate_date": "2026-03",
+      "dividend_type": "cumulative_variable",
+      "dividend_frequency": "monthly",
+      "convertible": false,
+      "gross_proceeds_usd": 2521000000,
+      "outstanding_size_usd": 3400000000,
+      "atm_remaining_usd": 3600000000,
+      "exchange": "NASDAQ",
+      "note": "Variable rate adjusted monthly to maintain ~$100 trading price. Flagship Digital Credit instrument. Grown to $3.4B."
+    },
+    "STRE": {
+      "name": "Stream",
+      "full_name": "10.00% Series A Perpetual Stream Preferred Stock",
+      "type": "eur_denominated_perpetual_preferred",
+      "ipo_date": "2025-11-13",
+      "ipo_shares": 7750000,
+      "ipo_price_eur": 80.00,
+      "stated_amount_eur": 100.00,
+      "dividend_rate_pct": 10.0,
+      "dividend_type": "cumulative",
+      "dividend_frequency": "quarterly",
+      "convertible": false,
+      "currency": "EUR",
+      "gross_proceeds_eur": 620000000,
+      "gross_proceeds_usd": 715100000,
+      "net_proceeds_eur": 608800000,
+      "net_proceeds_usd": 702200000,
+      "note": "First EUR-denominated preferred. Expands investor base to European markets."
+    }
+  },
+
+  "convertible_notes": [
+    {
+      "name": "0.625% Convertible Senior Notes due 2028",
+      "coupon_pct": 0.625,
+      "maturity": "2028",
+      "principal_usd": 1010000000,
+      "conversion_price_usd": 183.20,
+      "status": "outstanding"
+    },
+    {
+      "name": "0% Convertible Senior Notes due 2029",
+      "coupon_pct": 0.0,
+      "maturity": "2029-12-01",
+      "principal_usd": 3000000000,
+      "conversion_price_usd": 672.40,
+      "status": "outstanding",
+      "note": "Issued Nov 2024, largest single convertible issuance"
+    },
+    {
+      "name": "0.625% Convertible Senior Notes due 2030",
+      "coupon_pct": 0.625,
+      "maturity": "2030",
+      "principal_usd": 800000000,
+      "conversion_price_usd": 149.77,
+      "status": "outstanding"
+    },
+    {
+      "name": "0% Convertible Senior Notes due 2030",
+      "coupon_pct": 0.0,
+      "maturity": "2030",
+      "principal_usd": 2000000000,
+      "conversion_price_usd": 433.43,
+      "status": "outstanding",
+      "note": "Issued Feb 2025"
+    },
+    {
+      "name": "0.875% Convertible Senior Notes due 2031",
+      "coupon_pct": 0.875,
+      "maturity": "2031",
+      "principal_usd": 604000000,
+      "conversion_price_usd": 232.72,
+      "status": "outstanding"
+    },
+    {
+      "name": "2.25% Convertible Senior Notes due 2032",
+      "coupon_pct": 2.25,
+      "maturity": "2032",
+      "principal_usd": 800000000,
+      "conversion_price_usd": 204.33,
+      "status": "outstanding"
+    }
+  ],
+
+  "retired_debt": [
+    {
+      "name": "0% Convertible Senior Notes due 2027",
+      "principal_usd": 1050000000,
+      "status": "redeemed",
+      "redemption_date": "2025-02-24",
+      "note": "Substantially all converted to 7,373,528 MSTR shares"
+    }
+  ],
+
+  "summary": {
+    "total_convertible_debt_usd": 8214000000,
+    "weighted_avg_coupon_pct": 0.421,
+    "weighted_avg_maturity_years": 5.1,
+    "total_preferred_equity_raised_usd_approx": 5500000000,
+    "annual_preferred_dividend_obligation_usd_approx": 1000000000,
+    "cash_reserve_usd": 2250000000,
+    "dividend_coverage_years": 2.5,
+    "total_capital_raised_2025_usd": 25300000000,
+    "capital_plan": "Originally 21/21 ($42B), expanded to $84B in May 2025",
+    "atm_programs": {
+      "mstr_common_remaining_usd": 8100000000,
+      "strk_remaining_usd": 20300000000,
+      "strc_remaining_usd": 3600000000,
+      "strd_atm_size_usd": 4200000000,
+      "strf_atm_size_usd": 2100000000
+    }
+  },
+
+  "sources": [
+    "Strategy Q4 2025 Earnings (Feb 5, 2026)",
+    "strategy.com/purchases",
+    "strategy.com/debt",
+    "SEC EDGAR filings (8-K, 10-K, 10-Q)",
+    "CoinDesk, The Block, BusinessWire press releases",
+    "VanEck: Deconstructing Strategy (MSTR)"
+  ]
+}
