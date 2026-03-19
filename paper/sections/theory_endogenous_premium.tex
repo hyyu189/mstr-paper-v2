@@ -78,7 +78,7 @@ We replace the exogenous OU premium with a \emph{coupled} system of SDEs.
   %
   \begin{align}
     \frac{dS_t}{S_{t^-}} &= \mu_S\,dt + \sigma_S\,dW_t^S
-      + \eta\,\frac{dH_t}{H_{t^-}},
+      + \eta\,\frac{dH_t}{V_t},
     \label{eq:btc_impact} \\[6pt]
     d\pi_t &= \kappa\bigl(\pi^\star(\Phi_t) - \pi_t\bigr)\,dt
       + \sigma_\pi\,dW_t^\pi,
@@ -90,8 +90,9 @@ We replace the exogenous OU premium with a \emph{coupled} system of SDEs.
   where:
   \begin{itemize}
     \item $\mu_S$ is the BTC drift under $\mathbb{P}$;
-    \item $\eta \ge 0$ is the market-impact elasticity of BTC price to MSTR
-          accumulation;
+    \item $V_t$ is the BTC daily trading volume and $\eta \ge 0$ is the
+          market-impact coefficient (Kyle lambda; see
+          Section~\ref{sec:market_impact} for the full treatment);
     \item $\pi^\star(\Phi_t)$ is the \emph{endogenous fair premium} derived
           below;
     \item $\alpha > 0$ governs continuous accumulation intensity;
@@ -486,21 +487,22 @@ multiplicity.
       exists a \emph{unique} fixed point $\pi^\star_{\mathrm{low}} > 0$,
       which is stable ($G < 1$).  This is the \emph{normal premium regime}.
 
-    \item \textbf{(Strong feedback)} If $\Gamma$ is sufficiently large,
-      there exist \emph{three} fixed points:
+    \item \textbf{(Strong feedback)} For intermediate $\Gamma$, there
+      exist \emph{two} fixed points:
       \begin{itemize}
-        \item $\pi^\star_{\mathrm{low}}$: the \emph{low/spiral equilibrium}
+        \item $\pi^\star_{\mathrm{low}}$: the \emph{low equilibrium}
               (stable, $G < 1$);
-        \item $\pi^\star_{\mathrm{mid}}$: the \emph{tipping point}
-              (unstable, $G > 1$);
-        \item $\pi^\star_{\mathrm{high}}$: the \emph{flywheel equilibrium}
-              (stable, $G < 1$).
+        \item $\pi^\star_{\mathrm{high}}$: the \emph{high equilibrium}
+              (unstable, $G > 1$), which acts as the \emph{tipping point}
+              separating the basin of attraction of $\pi^\star_{\mathrm{low}}$
+              from explosive premium growth.
       \end{itemize}
 
-    \item \textbf{(Bifurcation)} The transition between one and three
-      equilibria occurs at a critical $\Gamma^*$ where $\pi^\star_{\mathrm{mid}}$
-      and $\pi^\star_{\mathrm{high}}$ collide in a \emph{saddle-node
-      bifurcation}.
+    \item \textbf{(Bifurcation)} At a critical
+      $\Gamma^* = e^{-(\sigma_\pi^{\mathrm{ss}})^2/2}$, the two fixed points
+      merge and disappear: for $\Gamma > \Gamma^*$ no finite equilibrium
+      exists under the steady-state formula, signalling that the feedback
+      loop is too strong for any static equilibrium to be self-consistent.
   \end{enumerate}
 \end{theorem}
 
@@ -512,56 +514,75 @@ multiplicity.
   $F(0) > 0$ (the option value is strictly positive when
   $\sigma_\pi^{\mathrm{ss}} > 0$, since $\mathbb{E}[(e^\pi - 1)^+] > 0$ for
   any non-degenerate distribution).  As $\pi^\star \to \infty$,
-  $F(\pi^\star) \sim \log(1 + \Gamma e^{\pi^\star}) \sim \pi^\star +
-  \log\Gamma$, so $F(\pi^\star) - \pi^\star \to \log\Gamma$.
-  However, the growth rate of $F$ in $\pi^\star$ eventually exceeds 1 for
-  intermediate values of $\pi^\star$ when $\Gamma$ is large, due to the
-  exponential term $e^{\pi^\star + (\sigma_\pi^{\mathrm{ss}})^2/2}$ in the
-  option value.
+  $F(\pi^\star) \sim \log\bigl(1 + \Gamma\,
+  e^{\pi^\star + (\sigma_\pi^{\mathrm{ss}})^2/2}\bigr) \sim \pi^\star +
+  \tfrac{1}{2}(\sigma_\pi^{\mathrm{ss}})^2 + \log\Gamma$,
+  so $h(\pi^\star) \equiv F(\pi^\star) - \pi^\star \to
+  \log\Gamma + \tfrac{1}{2}(\sigma_\pi^{\mathrm{ss}})^2$.
 
-  \emph{Step 2: Shape of $F$.}
-  Define $h(\pi^\star) = F(\pi^\star) - \pi^\star$.  We have $h(0) > 0$.
-  For small $\Gamma$, $F'(\pi^\star) < 1$ everywhere, so $h$ is strictly
-  decreasing and has a unique zero.
+  \emph{Step 2: Shape of $h$.}
+  Differentiating $F$ using the Black--Scholes delta identity shows
+  $F'(\pi^\star) = \Gamma\,\Phi(d_2)\,/\,(1 + \Gamma\,C(\pi^\star))
+  + 1 - 1$, where
+  $C = \mathbb{E}[(e^\pi-1)^+]$ and $d_2 = \pi^\star/\sigma_\pi^{\mathrm{ss}}$.
+  Setting $h'=0$ yields $\Gamma\,\Phi(d_2) = 1$, which has at most one
+  solution.  Hence $h$ has at most one local extremum (a minimum), and
+  $h = 0$ has at most two solutions under the steady-state formula
+  alone.
 
-  For large $\Gamma$, $F'(\pi^\star)$ can exceed 1 over an intermediate
-  range (the exponential growth of the option value dominates the logarithmic
-  compression), creating a region where $h$ is increasing.  This produces
-  the characteristic S-shaped curve with three crossings of $h = 0$.
-
-  \emph{Step 3: Saddle-node bifurcation.}
-  At the critical $\Gamma^*$, the function $h$ has a degenerate zero where
-  $h(\pi^\star_c) = 0$ and $h'(\pi^\star_c) = 0$ simultaneously, i.e.,
-  $F(\pi^\star_c) = \pi^\star_c$ and $F'(\pi^\star_c) = 1$.  This is the
-  standard saddle-node (fold) bifurcation.  For $\Gamma$ slightly above
-  $\Gamma^*$, the degenerate zero splits into two (the tipping point and the
-  flywheel equilibrium), while the low equilibrium persists.
+  \emph{Step 3: Bifurcation.}
+  For small $\Gamma$ (specifically $\Gamma < \Gamma^*$), $h$ is
+  monotonically decreasing with $h(0)>0$ and
+  $h(\infty) = \log\Gamma + \tfrac{1}{2}(\sigma_\pi^{\mathrm{ss}})^2 < 0$,
+  yielding a unique zero.
+  At $\Gamma = \Gamma^* = e^{-(\sigma_\pi^{\mathrm{ss}})^2/2}$,
+  we have $h(\infty) = 0$: the fixed point escapes to infinity.
+  For $\Gamma > \Gamma^*$ (but $\Gamma < 1$), $h$ remains monotonically
+  decreasing with $h(\infty)>0$, so $h>0$ everywhere and no finite
+  fixed point exists.
 
   \emph{Step 4: Stability.}
   At any fixed point, the linearized dynamics have eigenvalue
-  $-\kappa(1 - F'(\pi^\star))$.  The fixed point is stable iff $F'(\pi^\star) < 1$,
-  i.e., $G < 1$.  By the geometry of the S-curve, $\pi^\star_{\mathrm{low}}$
-  and $\pi^\star_{\mathrm{high}}$ satisfy $F' < 1$ (stable), while
-  $\pi^\star_{\mathrm{mid}}$ satisfies $F' > 1$ (unstable).
+  $-\kappa(1 - F'(\pi^\star))$.  The fixed point is stable iff
+  $F'(\pi^\star) < 1$, i.e., $G < 1$.  When two fixed points exist
+  (for intermediate $\Gamma$ slightly below $\Gamma^*$),
+  $\pi^\star_{\mathrm{low}}$ satisfies $F' < 1$ (stable), while
+  $\pi^\star_{\mathrm{high}}$ satisfies $F' > 1$ (unstable).
 \end{proof}
 
-\begin{remark}[Economic interpretation of the three equilibria]
+\begin{remark}[Economic interpretation of the equilibria]
   \label{rem:three_equil_econ}
   \leavevmode
   \begin{itemize}
-    \item \textbf{Flywheel equilibrium} ($\pi^\star_{\mathrm{high}}$):
-      High premium $\to$ aggressive issuance $\to$ rapid BTC-per-share
-      accretion $\to$ justified high premium.  Self-reinforcing virtuous
-      cycle.
-    \item \textbf{Tipping point} ($\pi^\star_{\mathrm{mid}}$):
-      Unstable separator.  Above it, the system is attracted to the flywheel;
-      below it, to the low equilibrium.  Corresponds to the critical premium
-      level at which the accumulation engine ``ignites.''
-    \item \textbf{Low/spiral equilibrium} ($\pi^\star_{\mathrm{low}}$):
-      Low premium $\to$ minimal issuance $\to$ negligible accretion $\to$
-      justified low premium.  In the limit, if the premium turns negative,
+    \item \textbf{Low equilibrium} ($\pi^\star_{\mathrm{low}}$):
+      Low-to-moderate premium $\to$ measured issuance $\to$ steady accretion
+      $\to$ justified premium.  In the limit, if the premium turns negative,
       this becomes the death spiral (Section~\ref{sec:death_spiral}).
+    \item \textbf{Tipping point} ($\pi^\star_{\mathrm{high}}$, when it
+      exists): Unstable separator.  Above it, the feedback loop is
+      self-amplifying (the ``flywheel ignition'' threshold); below it, the
+      system is attracted back to $\pi^\star_{\mathrm{low}}$.
+    \item \textbf{No-equilibrium regime} ($\Gamma > \Gamma^*$):
+      The feedback is too strong for any static premium to be self-consistent;
+      the system either explodes upward (flywheel) or must be stabilized by
+      forces outside the steady-state model (market impact, capacity
+      constraints, or endogenous variance).
   \end{itemize}
+\end{remark}
+
+\begin{remark}[Three equilibria with endogenous variance]
+  \label{rem:three_equil_endo}
+  The steady-state formula~\eqref{eq:pi_star_closed} uses the ``bare''
+  mean-reversion speed $\kappa$ in the stationary variance
+  $(\sigma_\pi^{\mathrm{ss}})^2 = \sigma_\pi^2/(2\kappa)$.
+  In the full nonlinear system, the effective variance is
+  $\sigma_\pi^2/\bigl(2\kappa(1-G)\bigr)$, which increases with $G$.
+  This endogenous variance introduces additional nonlinearity that can
+  produce a third (flywheel) equilibrium at high $\pi^\star$, restoring
+  the classic three-equilibrium picture: low (stable), tipping point
+  (unstable), and flywheel (stable).  The qualitative economic intuition
+  of Section~\ref{sec:multiple_equilibria} remains valid under this
+  extended specification.
 \end{remark}
 
 %-----------------------------------------------------------------------------
@@ -576,14 +597,16 @@ multiplicity.
   and then decreases.
   %
   \begin{enumerate}
-    \item As $\Gamma$ increases past $\Gamma^*$, the system (if starting at
-      $\pi^\star_{\mathrm{low}}$) does \emph{not} jump to
-      $\pi^\star_{\mathrm{high}}$; it remains at the low equilibrium until
-      a sufficiently large shock pushes $\pi_t$ above the tipping point.
-    \item If the system is at $\pi^\star_{\mathrm{high}}$ and $\Gamma$
-      decreases below $\Gamma^*$, the flywheel equilibrium vanishes via
-      saddle-node bifurcation, and the premium collapses discontinuously to
-      the unique remaining (low) equilibrium.
+    \item As $\Gamma$ increases toward $\Gamma^*$, the stable fixed point
+      $\pi^\star_{\mathrm{low}}$ rises continuously.  The system tracks
+      this equilibrium smoothly until $\Gamma$ exceeds $\Gamma^*$, at
+      which point no finite equilibrium exists and the premium enters an
+      explosive (flywheel) regime.
+    \item If the system is in the flywheel regime and $\Gamma$
+      subsequently decreases below $\Gamma^*$ (e.g., due to rising $r$
+      or falling $\alpha_N$), the finite equilibrium reappears at a
+      \emph{high} $\pi^\star$ value, and the premium collapses
+      discontinuously to $\pi^\star_{\mathrm{low}}$.
     \item The path of equilibrium selection thus exhibits \emph{hysteresis}:
       the premium reached at a given $\Gamma$ depends on the direction of
       approach.
@@ -632,7 +655,7 @@ multiplicity.
       growth expectation:
       \begin{equation}
         \label{eq:spiral_condition}
-        e^{\pi_t} < \frac{D_t}{H_t S_t}
+        e^{\pi_t} < \frac{D_t}{H_t S_t - D_t}
         \quad\Longleftrightarrow\quad
         E_t < D_t,
       \end{equation}
@@ -776,7 +799,7 @@ the stationary distribution.  This yields the following classification:
 
 %-----------------------------------------------------------------------------
 \subsubsection{Market Impact and BTC Price Feedback}
-\label{sec:market_impact}
+\label{sec:market_impact_ext}
 %-----------------------------------------------------------------------------
 
 Equation~\eqref{eq:btc_impact} includes a market-impact term
@@ -872,10 +895,11 @@ parameters of the baseline OU model:
     issuance intensity, leverage, and discount rates
     (Proposition~\ref{prop:steady_state}).
 
-  \item The reflexive feedback loop creates multiple equilibria (flywheel,
-    tipping point, spiral) connected by saddle-node bifurcations with
-    hysteresis (Theorem~\ref{thm:three_equilibria},
-    Proposition~\ref{prop:hysteresis}).
+  \item The reflexive feedback loop creates multiple equilibria connected by
+    bifurcations with hysteresis (Theorem~\ref{thm:three_equilibria},
+    Proposition~\ref{prop:hysteresis}).  With endogenous variance, the
+    classic flywheel/tipping-point/spiral triad emerges
+    (Remark~\ref{rem:three_equil_endo}).
 
   \item The mispricing $\Delta_t = \pi_t - \pi^\star$ reverts faster than the
     premium itself ($\kappa_\Delta = \kappa > \kappa_{\mathrm{eff}}$), enabling
